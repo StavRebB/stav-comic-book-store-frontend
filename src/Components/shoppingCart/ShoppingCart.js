@@ -25,12 +25,16 @@ class ShoppingCart extends Component {
     tryAddToCart = () => {
         this.props.addToCart(true)
     }
+
+    setTheseItems = (arr) => {
+      this.props.setItems(arr)
+    }
   
     render () {
       return (
         <main className="shoppingCart">
             <div className="items">
-                <ItemsToBuy cartContent={this.state.productList} getTotal={this.getTotal} addToCart={this.tryAddToCart} />
+                <ItemsToBuy cartContent={this.state.productList} getTotal={this.getTotal} addToCart={this.tryAddToCart} setItems={this.setTheseItems}/>
             </div>
             <div className="checkout">
                 <CheckoutDetails totalProductsSum={this.state.totalProductsSum} />

@@ -62,7 +62,6 @@ export const PostList = props => (
 export const PostEdit = props => (
     <Edit title={<PostTitle />} {...props}>
         <SimpleForm toolbar={<PostEditToolbar />}>
-            <SelectInput disabled source="id" />
             <ReferenceInput source="userId" reference="users">
                 <SelectInput optionText="name" />
             </ReferenceInput>

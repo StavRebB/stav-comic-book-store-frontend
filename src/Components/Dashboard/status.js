@@ -16,25 +16,25 @@ import {
 } from 'react-admin';
 import { Fragment } from 'react';
 
-const RoleBulkActionButtons = props => (
+const StatusBulkActionButtons = props => (
     <Fragment>
         <BulkDeleteWithConfirmButton {...props} />
     </Fragment>
 );
 
-const RoleTitle = ({ record }) => {
+const StatusTitle = ({ record }) => {
     return <span>Post {record ? `"${record.Name}"` : ''}</span>;
 };
 
-const RoleEditToolbar = props => (
+const StatusEditToolbar = props => (
     <Toolbar {...props} >
         <SaveButton />
         <DeleteWithConfirmButton/>
     </Toolbar>
 );
 
-export const RoleList = props => (
-    <List bulkActionButtons={<RoleBulkActionButtons />} {...props}>
+export const StatusList = props => (
+    <List bulkActionButtons={<StatusBulkActionButtons />} {...props}>
         <Datagrid rowClick="edit">
             <TextField source="id" />
             <TextField source="Name" />
@@ -43,7 +43,7 @@ export const RoleList = props => (
     </List>
 );
 
-export const RoleCreate = props => (
+export const StatusCreate = props => (
     <Create {...props}>
          <SimpleForm>
             <TextInput source="Name" validate={[required()]} name="name"/>
@@ -51,10 +51,10 @@ export const RoleCreate = props => (
      </Create>
  );
 
- export const RoleEdit = props => (
-    <Edit title={<RoleTitle />} {...props}>
-        <SimpleForm toolbar={<RoleEditToolbar />}>
-            <TextInput source="Name" validate={[required()]} name="name"/>
+ export const StatusEdit = props => (
+    <Edit title={<StatusTitle />} {...props}>
+        <SimpleForm toaolbar={<StatusEditToolbar />}>
+            <TextInput source="Name" name="name"/>
         </SimpleForm>
     </Edit>
 );

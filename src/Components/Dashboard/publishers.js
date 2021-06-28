@@ -16,45 +16,51 @@ import {
 } from 'react-admin';
 import { Fragment } from 'react';
 
-const RoleBulkActionButtons = props => (
+const PublisherBulkActionButtons = props => (
     <Fragment>
         <BulkDeleteWithConfirmButton {...props} />
     </Fragment>
 );
 
-const RoleTitle = ({ record }) => {
+const PublisherTitle = ({ record }) => {
     return <span>Post {record ? `"${record.Name}"` : ''}</span>;
 };
 
-const RoleEditToolbar = props => (
+const PublisherEditToolbar = props => (
     <Toolbar {...props} >
         <SaveButton />
         <DeleteWithConfirmButton/>
     </Toolbar>
 );
 
-export const RoleList = props => (
-    <List bulkActionButtons={<RoleBulkActionButtons />} {...props}>
+export const PublisherList = props => (
+    <List bulkActionButtons={<PublisherBulkActionButtons />} {...props}>
         <Datagrid rowClick="edit">
             <TextField source="id" />
             <TextField source="Name" />
+            <TextField source="PublicationCity" />
+            <TextField source="PublicationCountry" />
             <EditButton />
         </Datagrid>
     </List>
 );
 
-export const RoleCreate = props => (
+export const PublisherCreate = props => (
     <Create {...props}>
          <SimpleForm>
             <TextInput source="Name" validate={[required()]} name="name"/>
+            <TextInput source="PublicationCity" validate={[required()]} name="publicationCity"/>
+            <TextInput source="PublicationCountry" validate={[required()]} name="publicationCountry"/>
          </SimpleForm>
      </Create>
  );
 
- export const RoleEdit = props => (
-    <Edit title={<RoleTitle />} {...props}>
-        <SimpleForm toolbar={<RoleEditToolbar />}>
-            <TextInput source="Name" validate={[required()]} name="name"/>
+ export const PublisherEdit = props => (
+    <Edit title={<PublisherTitle />} {...props}>
+        <SimpleForm toaolbar={<PublisherEditToolbar />}>
+            <TextInput source="Name" name="name"/>
+            <TextInput source="PublicationCity" name="publicationCity"/>
+            <TextInput source="PublicationCountry" name="publicationCountry"/>
         </SimpleForm>
     </Edit>
 );

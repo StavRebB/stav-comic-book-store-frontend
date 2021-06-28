@@ -1,20 +1,14 @@
 import './storeFront.css';
 import React, { Component } from 'react';
-// import data from '../../data.json';
 import ItemView from './itemView/itemView';
 import Filters from './filters/filters';
-import Pagination from './Pagination/Pagination';
 import queryString from 'query-string';
-// import axios from 'axios';
-import {db} from '../../firebase'
-
 
 class StoreFront extends Component {
     constructor(props) {
         super(props);
         this.searchVal = queryString.parse(props.location.search)
         this.state = {
-            // products: data.products,
             products: null,
             language:"",
             format:"",
@@ -26,16 +20,20 @@ class StoreFront extends Component {
 
     componentDidMount = () => {
 
-        db.ref('products').on('value', (snapshot)=>{
-            let arr = [];
-            for (let obj in snapshot.val()) {
-                arr.push(snapshot.val()[obj])
-            }
-            this.setState({
-                products: arr,
-                originalProducts: arr
-            }, () => {console.log(this.state.productsList)})
+        this.loadProducts();
+
+    }
+
+    loadProducts = async () => {
+        const response = await fetch("/products", {
+            method: 'GET'
+        });
+        let myres = await response.json()
+        this.setState({
+            products: myres,
+            originalProducts: myres
         })
+        return myres
     }
 
 
@@ -48,16 +46,16 @@ class StoreFront extends Component {
                 products: this.state.originalProducts
             })
         } else {
-            let filteredProducts = products.filter(product => product.language === event.target.value)
+            let filteredProducts = products.filter(product => product.Language === event.target.value)
             if (!filteredProducts.length) {
                 this.setState({
                     language:event.target.value,
-                    products: this.state.originalProducts.filter(product => product.language === event.target.value)
+                    products: this.state.originalProducts.filter(product => product.Language === event.target.value)
                 })
             } else {
                 this.setState({
                     language:event.target.value,
-                    products: products.filter(product => product.language === event.target.value)
+                    products: products.filter(product => product.Language === event.target.value)
                 })
             }
         }
@@ -71,16 +69,16 @@ class StoreFront extends Component {
                products: this.state.originalProducts
             })
         } else {
-            let filteredProducts = products.filter(product => product.format === event.target.value)
+            let filteredProducts = products.filter(product => product.Format === event.target.value)
             if (!filteredProducts.length) {
                 this.setState({
                     format:event.target.value,
-                    products: this.state.originalProducts.filter(product => product.format === event.target.value)
+                    products: this.state.originalProducts.filter(product => product.Format === event.target.value)
                 })
             } else {
                 this.setState({
                     format:event.target.value,
-                    products: products.filter(product => product.format === event.target.value)
+                    products: products.filter(product => product.Format === event.target.value)
                 })
             }
         }
@@ -94,16 +92,16 @@ class StoreFront extends Component {
                 products: this.state.originalProducts
             })
         } else {
-            let filteredProducts = products.filter(product => product.publisher === event.target.value)
+            let filteredProducts = products.filter(product => product.Publisher === event.target.value)
             if (!filteredProducts.length) {
                 this.setState({
                     format:event.target.value,
-                    products: this.state.originalProducts.filter(product => product.publisher === event.target.value)
+                    products: this.state.originalProducts.filter(product => product.Publisher === event.target.value)
                 })
             } else {
                 this.setState({
                     format:event.target.value,
-                    products: products.filter(product => product.publisher === event.target.value)
+                    products: products.filter(product => product.Publisher === event.target.value)
                 })
             }
         }
@@ -115,13 +113,13 @@ class StoreFront extends Component {
             sort:event.target.value,
             products: products.sort((a,b) => {
                 if(event.target.value === "lowest") {
-                    if(Number(a.price) > Number(b.price)) {
+                    if(Number(a.CurrentPrice) > Number(b.CurrentPrice)) {
                         return 1
                     } else {
                         return -1
                     }
                 } else if (event.target.value === "highest") {
-                    if(Number(a.price) < Number(b.price)) {
+                    if(Number(a.CurrentPrice) < Number(b.CurrentPrice)) {
                         return 1
                     } else {
                         return -1
@@ -148,24 +146,24 @@ class StoreFront extends Component {
             let toSearch = (this.searchVal.q)
             if(toSearch && typeof(toSearch) === "string") {
                 toSearch = toSearch.toLowerCase()
-                catalogObj = catalogObj.filter(obj => (obj.title.toLowerCase().includes(toSearch)))
+                catalogObj = catalogObj.filter(obj => (obj.Title.toLowerCase().includes(toSearch)))
                 catalogueLength = catalogObj.length
             }
     
             let myUrl = window.location.href.split('catalogue/');
     
             if(myUrl[1] === "new") {
-                catalogObj = catalogObj.filter(obj => (obj.new === true))
+                catalogObj = catalogObj.filter(obj => (obj.IsNew === true))
                 catalogueLength = catalogObj.length
             };
     
             if(myUrl[1] === "specials") {
-                catalogObj = catalogObj.filter(obj => (obj.special === true))
+                catalogObj = catalogObj.filter(obj => (obj.Special === true))
                 catalogueLength = catalogObj.length
             };
     
             if(myUrl[1] === "top") {
-                catalogObj = catalogObj.filter(obj => (obj.top === true))
+                catalogObj = catalogObj.filter(obj => (obj.Top === true))
                 catalogueLength = catalogObj.length
             };
 
@@ -192,7 +190,7 @@ class StoreFront extends Component {
                         >
                         </ItemView>
                         <br/>
-                        <Pagination/>
+                        {/* <Pagination/> */}
                         <br/>
                     </div>
                 </main>

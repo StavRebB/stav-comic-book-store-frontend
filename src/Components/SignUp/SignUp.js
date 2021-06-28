@@ -1,9 +1,8 @@
 import React, { Component } from 'react';
 import './SignUp.css';
 import { Redirect } from 'react-router-dom';
-import {auth, db} from '../../firebase';
+import {auth} from '../../firebase';
 import firebase from 'firebase/app';
-import CurrAuth from '../../auth';
 
 class SignUp extends Component {
     constructor(props) {
@@ -20,8 +19,11 @@ class SignUp extends Component {
             country: "none",
             city: "none",
             address: "none",
+            gender: "none",
+            zipCode: "none",
             signUp: false,
             errorMessage: null,
+            body: null,
         }
     }
 
@@ -33,33 +35,36 @@ class SignUp extends Component {
     authfunc = async () => {
 
         await auth.createUserWithEmailAndPassword(this.state.email, this.state.password)
-        .then((user) => {
+        .then(async() => {
 
-            let data = {
-                firstName: this.state.firstName,
-                lastName: this.state.lastName,
-                password: this.state.password,
-                email: this.state.email,
-                country: this.state.country,
-                city: this.state.city,
-                address: this.state.address,
-                phoneNum: this.state.phoneNum,
-                dateOfBirth: this.state.DOB,
-                role: 2,
-                active: true,
-            }
-
-            db.ref().child("users").child(auth.currentUser.uid).set(
-                {
-                    'id': user.user.uid,
-                    ...data
-                }
-            )
-
-            localStorage.setItem('signupSuccess',"yes")
-
+            const response = await fetch("/members/add", {
+                method: 'POST',
+                headers: {
+                    "Accept": "multipart/form-data",
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ 
+                    FirstName: this.state.firstName,
+                    LastName: this.state.lastName,
+                    Email: this.state.email,
+                    Active: true,
+                    Role: "606b3a27b75b923d58cee841",
+                    DateOfBirth: this.state.DOB,
+                    Gender: this.state.gender,
+                    PhoneNumber: this.state.phoneNum,
+                    ZipCode: this.state.zipCod,
+                    Address: this.state.address,
+                    City: this.state.city,
+                    Country: this.state.country,
+                }),
+            });
+    
+            const body = await response.text();
             this.setState({
+                body: body,
                 signUp: true,
+            }, () => {
+                localStorage.setItem('signupSuccess',"yes")
             })
 
         })
@@ -180,7 +185,21 @@ class SignUp extends Component {
                     phoneNum: event.target.value
                 })
             }
-        } else if (event.target.id === "birthDate") {
+        } else if (event.target.id === "zipcode") {
+            if(!event.target.value.replace(/\s/g, '').length) {
+                this.setState({
+                    zipCode: "none",
+                })
+            } else {
+                this.setState({
+                    zipCode: event.target.value
+                })
+            }
+        } else if (event.target.id === "gender") {
+            this.setState({
+                gender: event.target.value
+            })
+        }else if (event.target.id === "birthDate") {
             this.setState({
                 DOB: event.target.value
             })
@@ -221,12 +240,12 @@ class SignUp extends Component {
 
         if (this.state.signUp === false) {
             return(    
-                <main className="signupForm pt-10">
+                <main className="signupForm pt-2s pb-4">
                     {this.state.errorMessage}
                     <div className="bg-gray-300 mx-auto w-1/3 text-3xl shadow shadow-md border-4 rounded border-solid border-8 border-gray-400 pl-4">
                         <h1 className="text-6xl text-yellow-600 py-4 font-medium">Enter Your Details</h1>
                         <form onSubmit={(event) => {this.handleSubmit(event)}}>
-                            <div className="grid gap-y-4 grid-cols-2 grid-rows-4 pb-2">
+                            <div className="grid gap-y-4 grid-cols-2 grid-rows-5 pb-2">
                                 <p  className="pb-4">
                                     <label htmlFor="firstName">First Name*:&nbsp;&nbsp;&nbsp;</label>
                                     <br/>
@@ -238,14 +257,23 @@ class SignUp extends Component {
                                     <input type="text" id="lastName" name="lastName" onBlur={(event) => {this.checkvalidty(event)}} />
                                 </p>
                                 <p  className="pb-4">
-                                    <label htmlFor="phoneNumber">Phone Number:&nbsp;&nbsp;&nbsp;</label>
+                                    <label htmlFor="gender">Gender:&nbsp;&nbsp;&nbsp;</label>
                                     <br/>
-                                    <input type="text" id="phoneNumber" name="phoneNumber" onBlur={(event) => {this.checkvalidty(event)}} className="col-span-1 row-span-1"/>
+                                    <select name="gender" id="gender" className="col-span-1 row-span-1 w-10/12" onChange={(event) => {this.checkvalidty(event)}}>
+                                        <option value="male">Male</option>
+                                        <option value="female">Female</option>
+                                        <option value="other">Other</option>
+                                    </select>
                                 </p>
                                 <p  className="pb-4">
                                     <label htmlFor="birthDate">Date of Birth:&nbsp;&nbsp;&nbsp;</label>
                                     <br/>
                                     <input type="date" id="birthDate" name="birthDate" onBlur={(event) => {this.checkvalidty(event)}} className="w-72 pr-2"/>
+                                </p>
+                                <p  className="pb-4">
+                                    <label htmlFor="phoneNumber">Phone Number:&nbsp;&nbsp;&nbsp;</label>
+                                    <br/>
+                                    <input type="text" id="phoneNumber" name="phoneNumber" onBlur={(event) => {this.checkvalidty(event)}} className="col-span-1 row-span-1"/>
                                 </p>
                                 <p  className="pb-4">
                                     <label htmlFor="country">Country:&nbsp;&nbsp;&nbsp;</label>
@@ -256,6 +284,11 @@ class SignUp extends Component {
                                     <label htmlFor="city">City:&nbsp;&nbsp;&nbsp;</label>
                                     <br/>
                                     <input type="text" id="city" name="city" onBlur={(event) => {this.checkvalidty(event)}} />
+                                </p>
+                                <p  className="pb-4">
+                                    <label htmlFor="zipcode">Zip Code:&nbsp;&nbsp;&nbsp;</label>
+                                    <br/>
+                                    <input type="text" id="zipcode" name="zipcode" onBlur={(event) => {this.checkvalidty(event)}} className="col-span-1 row-span-1"/>
                                 </p>
                                 <p  className="pb-4">
                                     <label htmlFor="address">Address:&nbsp;&nbsp;&nbsp;</label>

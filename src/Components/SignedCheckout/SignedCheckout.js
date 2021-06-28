@@ -1,7 +1,6 @@
 import React, { Component } from 'react';
-import FinalDetails from '../FinalDetails/FinalDetails';
+import FinalDetails from '../Checkout/FinalDetails/FinalDetails';
 import './SignedCheckout.css';
-import {db} from '../../firebase'
 import SignedCheckoutForms from './SignedCheckoutForms/SignedCheckoutForms'
 
 class SignedCheckout extends Component {
@@ -13,49 +12,49 @@ class SignedCheckout extends Component {
     }
   }
 
-  componentDidMount = () => {
-    db.ref('users').on('value', (snapshot)=>{
-        let arr = [];
-        for (let obj in snapshot.val()) {
-            arr.push(snapshot.val()[obj])
-        }
+  componentDidMount = async() => {
 
-        let currEmail = localStorage.getItem('currentUser')
+    let currEmail = localStorage.getItem('currentUser')
 
-        for (let item of arr) {
-            if(item.email === currEmail) {
-                this.setState({
-                    curUser: item
-                },() => {
-                    this.props.addToOrder("firstName", this.state.curUser.firstName)
+    const response = await fetch(`/members/email/${currEmail}`, {
+      method: 'GET'
+    });
+    let myres = await response.json()
 
-                    this.props.addToOrder("email", this.state.curUser.email)
-            
-                    if(this.state.curUser.lastName !== "none") {
-                        let fullname = `${this.state.curUser.firstName} ${this.state.curUser.lastName}`
-                        this.props.addToOrder("fullName", fullname) 
-                        this.props.addToOrder("lastName", this.state.curUser.lastName)
-                    }
-            
-                    if(this.state.curUser.phoneNum !== "none") {
-                        this.props.addToOrder("phoneNum", this.state.curUser.phoneNum) 
-                    }
-            
-                    if(this.state.curUser.address !== "none") {
-                        this.props.addToOrder("fullAd", this.state.curUser.address) 
-                    }
-            
-                    if(this.state.curUser.city !== "none") {
-                        this.props.addToOrder("city", this.state.curUser.city) 
-                    }
-            
-                    if(this.state.curUser.country !== "none") {
-                        this.props.addToOrder("country", this.state.curUser.country) 
-                    }
-                })
-            }
-        }
+    this.setState({
+      curUser: myres
+    }, () => {
+
+      this.props.addToOrder("firstName", this.state.curUser.FirstName)
+      this.props.addToOrder("email", currEmail)
+  
+      if(this.state.curUser.LastName !== "none" && this.state.curUser.LastName !== null) {
+        let fullname = `${this.state.curUser.FirstName} ${this.state.curUser.LastName}`
+        this.props.addToOrder("fullName", fullname) 
+        this.props.addToOrder("lastName", this.state.curUser.LastName)
+      }
+  
+      if(this.state.curUser.PhoneNumber !== "none" && this.state.curUser.PhoneNumber !== null) {
+        this.props.addToOrder("phoneNum", this.state.curUser.PhoneNumber) 
+      }
+  
+      if(this.state.curUser.Address !== "none" && this.state.curUser.Address !== null) {
+        this.props.addToOrder("fullAd", this.state.curUser.Address) 
+      }
+  
+      if(this.state.curUser.City !== "none" && this.state.curUser.City !== null) {
+          this.props.addToOrder("city", this.state.curUser.City) 
+      }
+  
+      if(this.state.curUser.Country !== "none" && this.state.curUser.Country !== null) {
+          this.props.addToOrder("country", this.state.curUser.Country) 
+      }
+  
+      if(this.state.curUser.ZipCode !== "none" && this.state.curUser.ZipCode !== null) {
+        this.props.addToOrder("zipCode", this.state.curUser.ZipCode) 
+      }
     })
+
   }
 
   setDelivery = (val) => {

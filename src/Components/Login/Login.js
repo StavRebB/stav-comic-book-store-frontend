@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import { Link } from 'react-router-dom';
 import './Login.css';
-import {auth, db} from '../../firebase'
+import {auth} from '../../firebase'
 import firebase from 'firebase/app'
 import CurrAuth from '../../auth';
 
@@ -13,6 +13,7 @@ class Login extends Component {
             password: null,
             isSignedIn: false,
             errorMessage: null,
+            body: null
         }
     }
 
@@ -22,14 +23,13 @@ class Login extends Component {
             this.setState({
                 errorMessage: <h1 className="text-3xl text-yellow-300 text-center pb-5 pt-5">
                                     <i className="fas fa-check-square"></i> 
-                                    You're now signed in!
+                                    You're now signed up!
                                 </h1>
             }, () => {
+                localStorage.removeItem('signupSuccess')
                 setTimeout(() => {
                     this.setState({
                         errorMessage: null
-                    }, () => {
-                        localStorage.removeItem('signupSuccess')
                     })
                 }, 10000);
             })
@@ -66,54 +66,53 @@ class Login extends Component {
         }
     };
 
-    isSignedWithGoogle = (currEmail) => {   
-        let existing = false;
+    isSignedWithGoogle = async(currEmail) => {   
 
+        const response = await fetch(`/members/email/${currEmail}`, {
+            method: 'GET'
+        });
+        let myres = await response.json()
 
-        db.ref('users').on('value', (snapshot)=>{
-            let arr = [];
-            for (let obj in snapshot.val()) {
-                arr.push(snapshot.val()[obj])
-            }
-
-            for (let item of arr) {
-                if(item.email === currEmail) {
-                    existing = true;
-                    break;
-                }
-            }
-        })
-
-        if(!existing) {
-            this.createNewUser();
-        } else {
+        if(myres.id) {
             this.props.history.push("/account/profile")
+        } else {
+            this.createNewUser();
         }
     }
 
-    createNewUser = () => {
-        let data = {
-            firstName: auth.currentUser.displayName,
-            lastName: "none",
-            password: "none",
-            email: auth.currentUser.email,
-            country: "none",
-            city: "none",
-            address: "none",
-            phoneNum: "none",
-            dateOfBirth: "none",
-            role: 2,
-            active: true,
-        }
+    createNewUser = async() => {
 
-        db.ref().child("users").child(auth.currentUser.uid).set(
-            {
-                'id': auth.currentUser.uid,
-                ...data
-            }
-        )
+        const response = await fetch("/members/add", {
+            method: 'POST',
+            headers: {
+                "Accept": "multipart/form-data",
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ 
+                FirstName: auth.currentUser.displayName,
+                LastName: "none",
+                Email: auth.currentUser.email,
+                Active: true,
+                Role: "606b3a27b75b923d58cee841",
+                DateOfBirth: null,
+                Gender: "other",
+                PhoneNumber: "none",
+                ZipCode: "none",
+                Address: "none",
+                City: "none",
+                Country: "none",
+            }),
+        });
 
-        this.props.history.push("/account/profile")
+        const body = await response.text();
+        this.setState({
+            body: body,
+            signUp: true,
+        }, () => {
+            localStorage.setItem('signupSuccess',"yes")
+            this.props.history.push("/account/profile")
+        })
+
     }
 
     signinAuthFunct = async () => {

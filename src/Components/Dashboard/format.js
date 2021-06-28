@@ -16,25 +16,25 @@ import {
 } from 'react-admin';
 import { Fragment } from 'react';
 
-const RoleBulkActionButtons = props => (
+const FormatBulkActionButtons = props => (
     <Fragment>
         <BulkDeleteWithConfirmButton {...props} />
     </Fragment>
 );
 
-const RoleTitle = ({ record }) => {
+const FormatTitle = ({ record }) => {
     return <span>Post {record ? `"${record.Name}"` : ''}</span>;
 };
 
-const RoleEditToolbar = props => (
+const FormatEditToolbar = props => (
     <Toolbar {...props} >
         <SaveButton />
         <DeleteWithConfirmButton/>
     </Toolbar>
 );
 
-export const RoleList = props => (
-    <List bulkActionButtons={<RoleBulkActionButtons />} {...props}>
+export const FormatList = props => (
+    <List bulkActionButtons={<FormatBulkActionButtons />} {...props}>
         <Datagrid rowClick="edit">
             <TextField source="id" />
             <TextField source="Name" />
@@ -43,7 +43,7 @@ export const RoleList = props => (
     </List>
 );
 
-export const RoleCreate = props => (
+export const FormatCreate = props => (
     <Create {...props}>
          <SimpleForm>
             <TextInput source="Name" validate={[required()]} name="name"/>
@@ -51,10 +51,10 @@ export const RoleCreate = props => (
      </Create>
  );
 
- export const RoleEdit = props => (
-    <Edit title={<RoleTitle />} {...props}>
-        <SimpleForm toolbar={<RoleEditToolbar />}>
-            <TextInput source="Name" validate={[required()]} name="name"/>
+ export const FormatEdit = props => (
+    <Edit title={<FormatTitle />} {...props}>
+        <SimpleForm toaolbar={<FormatEditToolbar />}>
+            <TextInput source="Name" name="Name"/>
         </SimpleForm>
     </Edit>
 );

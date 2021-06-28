@@ -1,6 +1,5 @@
 import React, { Component } from 'react';
 import './TrackOrder.css';
-import {db} from '../../firebase'
 import formatPrice from '../utility/Price'
 
 class TrackOrder extends Component {
@@ -8,21 +7,17 @@ class TrackOrder extends Component {
         super()
         this.state = {
             orders: [],
+            products: [],
             num: null,
             curOrder: null,
+            ordProds: [],
+            status: null,
         }
     }
 
     componentDidMount = () => {
-        db.ref('orders').on('value', (snapshot)=>{
-            let arr = [];
-            for (let obj in snapshot.val()) {
-                arr.push(snapshot.val()[obj])
-            }
-            this.setState({
-                orders: arr,
-            })
-        })
+        this.getOrders();
+        this.getProducts();
     }
 
     addNum = (event) => {
@@ -31,20 +26,60 @@ class TrackOrder extends Component {
         })
     }
 
+    getOrders = async() => {
+        const response = await fetch(`/orders`, {
+            method: 'GET'
+        });
+        let myres = await response.json()
+        this.setState({
+            orders: myres
+        })
+    }
+
+    getProducts = async() => {
+        const response = await fetch(`/products`, {
+            method: 'GET'
+        });
+        let myres = await response.json()
+        this.setState({
+            products: myres
+        })
+    }
+
+    getStatus = async(statusid) => {
+        const response = await fetch(`/status/${statusid}`, {
+            method: 'GET'
+        });
+        let myres = await response.json()
+        this.setState({
+            status: myres.Name
+        })
+    }
+
     findOrder = () => {
-        let ordNum = Number(this.state.num)
+
+        let ordNum = this.state.num
+
         let isFound = false;
-        if(this.state.orders.length) {
-            for(let ord of this.state.orders) {
-                if(ord.id === ordNum) {
-                    isFound = true;
+
+        let ords = [...this.state.orders]
+
+        if(ords.length) {
+            for(let ord of ords) {
+                if (ord.OrderNum === ordNum) {
+                    isFound = true
                     this.setState({
                         curOrder: ord,
-                    },() => {console.log(this.state.curOrder)})
+                        ordProds: ord.Products,
+                    }, () => {
+                        this.getStatus(this.state.curOrder.Status)
+                        this.getProdDetails()
+                    })
                     break;
                 }
             }
         }
+
         if(isFound === false) {
             this.setState({
                 curOrder: null
@@ -52,11 +87,32 @@ class TrackOrder extends Component {
         }
     }
 
+    getProdDetails = () => {
+        let itemsArr = [...this.state.ordProds]
+        let prodArr = [...this.state.products]
+
+        if(itemsArr.length) {
+            for(let item of itemsArr) {
+                for (let product of prodArr) {
+                    if (item.id === product.id) {
+                        item.isbn = product.ISBN10
+                        item.title = product.Title
+                        item.price = product.CurrentPrice
+                    }
+                }
+            }
+        }
+
+        this.setState({
+            ordProds: itemsArr
+        })
+    }
+
     render () {
 
         let orderID;
         if(this.state.curOrder) {
-            orderID = this.state.curOrder.id
+            orderID = this.state.curOrder.OrderNum
         }
 
         let ordDetails;
@@ -65,15 +121,15 @@ class TrackOrder extends Component {
             <div>
                 <h1 className="text-yellow-800 text-4xl font-medium mt-2 my-4">Payer Details</h1> 
                 <div className="mb-4">
-                    <p><span className="underline">Order Status:</span> {this.state.curOrder.status}</p>
+                    <p><span className="underline">Order Status:</span> {this.state.status}</p>
                     <table>
                         <tr>
-                            <td className="w-72"><span className="underline">Payer Name:</span> {this.state.curOrder.payerName}</td>
-                            <td className="w-72"><span className="underline">email:</span> {this.state.curOrder.email}</td>
+                            <td className="w-72"><span className="underline">Payer Name:</span> {this.state.curOrder.PayerName}</td>
+                            <td className="w-72"><span className="underline">email:</span> {this.state.curOrder.Email}</td>
                         </tr>
                         <tr>
-                            <td className="w-72"><span className="underline">Payment:</span> {this.state.curOrder.payment}</td>
-                            <td className="w-72"><span className="underline">Price:</span> {formatPrice(this.state.curOrder.price)}</td>
+                            <td className="w-72"><span className="underline">Payment:</span> {this.state.curOrder.Payment}</td>
+                            <td className="w-72"><span className="underline">Price:</span> {formatPrice(this.state.curOrder.Sum)}</td>
                         </tr>
                     </table>
                 </div>
@@ -82,11 +138,20 @@ class TrackOrder extends Component {
             <div>
                 <h1 className="text-yellow-800 text-4xl font-medium mt-2 my-4">Products</h1> 
                 <table>
-                    {this.state.curOrder.items.map(item => (
+                    <thead className="text-yellow-700">
                         <tr>
-                            <td className="w-40">{item.ISBN10}</td>
+                            <th>ISBN10</th>
+                            <th>Title</th>
+                            <th>Price Per Unit</th>
+                            <th>Amount</th>
+                        </tr>
+                    </thead>
+                    {this.state.ordProds && this.state.ordProds.map(item => (
+                        <tr>
+                            <td className="w-40">{item.isbn}</td>
                             <td className="w-96">{item.title}</td>
                             <td className="w-96">{formatPrice(item.price)}</td>
+                            <td className="w-96">{item.amount}</td>
                         </tr>
                     ))}
                 </table>
@@ -96,19 +161,19 @@ class TrackOrder extends Component {
                 <h1 className="text-yellow-800 text-4xl font-medium mt-2 my-4">Reciever Details</h1>
                 <table>
                     <tr>
-                        <td className="w-72"><span className="underline">Reciever Name:</span> {this.state.curOrder.recieverName}</td>
-                        <td className="w-72"><span className="underline">Phone Number:</span> {this.state.curOrder.phoneNum}</td>
+                        <td className="w-72"><span className="underline">Reciever Name:</span> {this.state.curOrder.RecieverName}</td>
+                        <td className="w-72"><span className="underline">Phone Number:</span> {this.state.curOrder.PhoneNumber}</td>
                     </tr>
                     <tr>
-                        <td className="w-72"><span className="underline">Address:</span> {this.state.curOrder.fullAd}</td>
-                        <td className="w-72"><span className="underline">Zipcode:</span> {this.state.curOrder.zipCode}</td>
+                        <td className="w-72"><span className="underline">Address:</span> {this.state.curOrder.Address}</td>
+                        <td className="w-72"><span className="underline">Zipcode:</span> {this.state.curOrder.ZipCode}</td>
                     </tr>
                     <tr>
-                        <td className="w-72"><span className="underline">City:</span> {this.state.curOrder.city}</td>
-                        <td className="w-72"><span className="underline">Country:</span> {this.state.curOrder.country}</td>
+                        <td className="w-72"><span className="underline">City:</span> {this.state.curOrder.City}</td>
+                        <td className="w-72"><span className="underline">Country:</span> {this.state.curOrder.Country}</td>
                     </tr>
                 </table>
-                <p className="mb-2"><span className="underline">Notes:</span> {this.state.curOrder.notes}</p>
+                <p className="mb-2"><span className="underline">Notes:</span> {this.state.curOrder.Notes}</p>
             </div>
         </div>
         } else {

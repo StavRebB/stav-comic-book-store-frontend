@@ -12,19 +12,16 @@ import SignUp from './Components/SignUp/SignUp';
 import ContactUs from './Components/ContactUs/ContactUs';
 import ShoppingCart from './Components/shoppingCart/ShoppingCart';
 import Checkout from './Components/Checkout/Checkout'
-// import data from './data.json'
 import { Switch, Route } from 'react-router-dom';
-import FinalForm from './Components/Checkout/FinalForm/FinalForm';
+import FinalForm from './Components/FinalForm/FinalForm';
 import Confirmation from './Components/Confirmation/Confirmation';
 import BlogPost from './Components/BlogPost/BlogPost';
-// import axios from 'axios';
 import {ProtectedRoute} from './protectedRoute';
 import {ProtectedCCheckoutRoute} from './protectedCheckoutRoute'
 import LoginPage from './Components/LoginPage/LoginPage';
 import AccountProfile from './Components/AccountProfile/AccountProfile';
 import AdminMain from './Components/Dashboard/AdminMain';
 import AddProduct from './Components/AddProduct/AddProduct';
-import {db} from './firebase'
 import Currauth from './auth';
 import TrackOrder from './Components/TrackOrder/TrackOrder';
 import SignedCheckout from './Components/SignedCheckout/SignedCheckout';
@@ -55,6 +52,7 @@ class App extends Component {
       isSignedIn: false,
       displayName: "user",
       orderNum: null,
+      finalItems:[],
     }
   }
 
@@ -152,37 +150,34 @@ class App extends Component {
     },() => {this.addSum()})
   }
 
-  addSum =() => {
+  addSum = async() => {
     let sumPrice = 0;
-    if (this.state.productList) {
+    if (this.state.productList.length) {
       let products = [...this.state.productList];
 
-      db.ref('products').on('value', (snapshot)=>{
-        let arr = [];
-        for (let obj in snapshot.val()) {
-          arr.push(snapshot.val()[obj])
+      const response = await fetch(`/products`, {
+        method: 'GET'
+      });
+      let myres = await response.json()
+
+      myres.forEach((product) => {
+        if(products.includes(product.ISBN10)) {
+          sumPrice += Number(product.CurrentPrice);
+          localStorage.setItem('finalPrice',sumPrice);
         }
-        arr.forEach((product) => {
-          if(products.includes(product.ISBN10)) {
-            console.log("finding price")
-            sumPrice += Number(product.price);
-            localStorage.setItem('finalPrice',sumPrice);
-          }
-        })
       })
+
     }
   }
 
   isUserSignedIn = (bool) => {
     if(bool === true) {
-      console.log("signing in...")
       Currauth.login(() => {
         this.setState({
           isSignedIn: true,
         })
       })
     } else {
-      console.log("signing out now...")
       Currauth.logout(() => {
         this.setState({
           isSignedIn: false,
@@ -192,7 +187,6 @@ class App extends Component {
   }
 
   curUserName = (name) => {
-    console.log(name)
     this.setState({
       displayName: name,
     })
@@ -204,12 +198,18 @@ class App extends Component {
     })
   }
 
+  setItems = (arr) => {
+    this.setState({
+      finalItems: arr
+    })
+  }
+
   render () {
     return (
       <div className="bg-gray-800 globalFont">
         <Header cartNum={this.state.productNum} isSignedIn={this.state.isSignedIn} isUserSignedIn={this.isUserSignedIn} curUser={this.state.displayName}/>
           <Switch>
-            <Route path="/" exact component={Homepage} />
+            <Route path="/" exact render={(matchProps) => (<Homepage {...matchProps} {...this.props} addSum={this.addSum} />)} />
             <ProtectedRoute 
               exact 
               path="/signindone" 
@@ -235,7 +235,8 @@ class App extends Component {
             <Route path="/shoppingCart" 
               render={(matchProps) => (<ShoppingCart {...matchProps} {...this.props} 
               cartContent={this.state.productList} 
-              addToCart={this.addToCart} 
+              addToCart={this.addToCart}
+              setItems={this.setItems} 
               />)}
             />
             <Route path="/blog" component={Blog} />
@@ -249,7 +250,7 @@ class App extends Component {
             <Route path="/sign-up" component={SignUp} isUserSignedIn={this.isUserSignedIn}/>
             <Route path="/contact-us" component={ContactUs} />
             <Route path="/track-order" component={TrackOrder} />
-            <Route path="/confirmation" render={(matchProps) => (<Confirmation {...matchProps} {...this.props} addToCart={this.addToCart} orderNum={this.state.orderNum} />)} />
+            <Route path="/confirmation" render={(matchProps) => (<Confirmation {...matchProps} {...this.props} addToCart={this.addToCart} orderNum={this.state.orderNum} email={this.state.email} />)} />
             <Route path="/checkout" render={(matchProps) => (<Checkout {...matchProps} {...this.props} addToOrder={this.addToOrder} />)} />
             <Route path="/finalstage" 
               render={(matchProps) => (<FinalForm {...matchProps} {...this.props}
@@ -269,6 +270,7 @@ class App extends Component {
                 expDate={this.state.expDate}
                 delivery={this.state.delivery}
                 country={this.state.country}
+                items={this.state.finalItems}
                 orderNum = {this.orderNum}
               />)} 
             />

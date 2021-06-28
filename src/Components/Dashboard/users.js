@@ -46,7 +46,6 @@ const UserFilter = (props) => (
 );
 
 export const UserList = props => (
-    // <List filters={<UserFilter />} bulkActionButtons={<UserBulkActionButtons />} {...props}>
         <List filters={<UserFilter />} {...props}>
         <Datagrid rowClick="edit">
             <TextField source="id" />
@@ -55,8 +54,6 @@ export const UserList = props => (
             <EmailField source="email" />
             <TextField source="country" />
             <TextField source="city" />
-            {/* <TextField source="phone" /> */}
-            {/* <MyUrlField source="website" /> */}
             <ReferenceField source="role" reference="roles">
                 <TextField source="title"/>
             </ReferenceField>
@@ -70,7 +67,6 @@ export const UserList = props => (
 export const UserEdit = props => {
     return (
         <Edit title={<UserName />} {...props}>
-            {/* <SimpleForm toolbar={<UserEditToolbar />} save={() => {console.log(newRole)}}> */}
             <SimpleForm toolbar={<UserEditToolbar />}>
                 <TextInput disabled source="id" />
                 <TextInput source="firstName" validate={[required()]}/>
@@ -84,11 +80,6 @@ export const UserEdit = props => {
                 <ReferenceInput source="role" reference="roles">
                     <SelectInput optionText="title" />
                 </ReferenceInput>
-                {/* <SelectInput source="role" choices={[
-                    { id: 0, name: 'Store Owner' },
-                    { id: 1, name: 'Admin' },
-                    { id: 2, name: 'Customer' },
-                ]} /> */}
                 <BooleanInput label="Active" source="active"/>
             </SimpleForm>
         </Edit>

@@ -1,31 +1,28 @@
 import React, { Component } from 'react';
 import './Blog.css';
-import blogposts from '../../blogposts.json'
 import { Link } from 'react-router-dom';
-import axios from 'axios';
 
 class Blog extends Component {
     constructor(){
         super();
         this.state = {
-            posts: blogposts.posts,
-            // posts: null,
+            posts: null,
         }
     }
 
-    // componentDidMount = () => {
-    //     let self = this
+    componentDidMount = () => {
+        this.getPosts();
+    }
 
-    //     axios.get('http://localhost:3000/posts')
-    //     .then(function(response) {
-    //         self.setState({
-    //             posts: response.data,
-    //         })
-    //     })
-    //     .catch( function(error) {
-    //         console.log(error)
-    //     })
-    // }
+    getPosts = async() => {
+        const response = await fetch(`/blogposts`, {
+            method: 'GET'
+        });
+        let myres = await response.json()
+        this.setState({
+            posts: myres
+        })
+    }
 
     render () {
         return(    
@@ -35,14 +32,14 @@ class Blog extends Component {
                 </div>
                 <div className="blogBody">
                     {this.state.posts && this.state.posts.map(post => (
-                        <div key={post._id} className="blogpost w-1/2 mx-auto py-1 text-xl mb-5">
+                        <div key={post.id} className="blogpost w-1/2 mx-auto py-1 text-xl mb-5">
                             <div className="datePart w-32 bg-yellow-800 text-yellow-100 rounded-t-lg text-center py-1 shadow-inner">
-                                {post.date}
+                                {post.DateOfWriting.split('T')[0]}
                             </div>
                             <div className="titlePart w-full bg-yellow-50 pl-3 py-4 text-4xl text-yellow-700 rounded-tr-lg">
-                                {post.title}
+                                {post.Title}
                             </div>
-                            <Link to={"/blogpost/" + post.postName}>
+                            <Link to={"/blogpost/" + post.id}>
                                 <button className="readPart w-full bg-yellow-200 text-left pl-3 py-2 text-2xl">
                                     Read More <i className="fas fa-arrow-right" />
                                 </button>

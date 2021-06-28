@@ -10,15 +10,60 @@ class ContactUs extends Component {
             email: null,
             msgTtl: null,
             msgBody: null,
-            errorMessage:null
+            errorMessage:null,
+            sent: null,
+            storename: null,
+            storeaddress: null,
+            storezc: null,
+            storecity: null,
+            storecountry: null,
+            storepn: null,
         }
         this.handleSubmit = this.handleSubmit.bind(this)
     }
 
-    handleSubmit = (event) => {
+    componentDidMount = () => {
+        this.getDetails()
+    }
+
+    getDetails = async() => {
+        const response = await fetch("/storedetails", { method: 'GET' })
+        const myres = await response.json()
+        this.setState({
+            storename: myres[0].Name,
+            storeaddress: myres[0].Address,
+            storezc: myres[0].ZipCode,
+            storecity: myres[0].City,
+            storecountry: myres[0].Country,
+            storepn: myres[0].PhoneNumber,
+        })
+    }
+
+    handleSubmit = async(event) => {
         event.preventDefault();
+        let someNum = Date.now()
+        const response = await fetch("/mail/sendmailfromclient", {
+            method: 'POST',
+            headers: {
+                "Accept": "application/json",
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ 
+                clientmail: this.state.email,
+                subject: `New Client Message - ${someNum}`,
+                content: `
+                email: ${this.state.email},
+                name: ${this.state.nameTxt},
+                subject: ${this.state.msgTtl},
+                ${this.state.msgBody}
+                `,
+            }),
+        });
+
+        const body = await response.text();
         event.target.reset();
         this.setState({
+            sent: body,
             errorMessage: 
                 <h1 className="text-3xl text-green-700 text-center pb-5 pt-5">
                     <i className="fas fa-check-circle" /> 
@@ -171,16 +216,16 @@ class ContactUs extends Component {
                 </h1>
                 <div className="text-2xl text-gray-200 text-center pb-10">
                     <p>
-                        <span className="text-yellow-600 text-3xl">At</span> FUNNYBOOKS
+                        <span className="text-yellow-600 text-3xl">At</span> {this.state.storename}
                         <br/>
-                        Sit amet 48 consectetur 13553
+                        {this.state.storeaddress} {this.state.storezc}
                         <br/>
-                        Quisque aliquam, Proin
+                        {this.state.storecity}, {this.state.storecountry}
                         <br/>
-                        Tel.: 077-8956434
+                        Tel.: {this.state.storepn}
                     </p>
                 </div>
-                <Map/>
+                {this.state.storeaddress && <Map address={this.state.storeaddress} name={this.state.storename} zipcode={this.state.storezc} city={this.state.storecity} country={this.state.storecountry} phone={this.state.storepn}/>}
                 <h1 className="text-center text-4xl py-5 font-medium text-yellow-500">Send us a message</h1>
                 <div className="w-1/2 mx-auto bg-gray-300 text-2xl rounded border-4 border-gray-500 text-center mb-5">
                     <form onSubmit={this.handleSubmit}>

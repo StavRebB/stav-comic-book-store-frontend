@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import './FinalDetails.css';
-import formatPrice from '../utility/Price'
-import formatPrecent from '../utility/Pecent'
+import formatPrice from '../../utility/Price'
+import formatPrecent from '../../utility/Pecent'
 
 class FinalDetails extends Component {
     constructor(props) {
@@ -10,18 +10,22 @@ class FinalDetails extends Component {
             taxRate: 5,
             totalProductsSum: localStorage.getItem('finalPrice'),
             totalPrice: 0,
-            coupon: ((localStorage.getItem('coupon')==="15") ? "15%" : " None"),
+            coupon: ((localStorage.getItem('coupon')!==null) ? `${localStorage.getItem('coupon')}%` : " None"),
             delivery: " None",
             priceWithDelivery: 0,
+            deliveries: []
         }
     }
 
     componentDidMount = () => {
+
+        this.setDeliveries()
+
         let addOn = (this.state.totalProductsSum/100) * this.state.taxRate;
         let finalPrice = Number(this.state.totalProductsSum) + addOn;
-        console.log(this.state.coupon)
         if (this.state.coupon !== " None") {
-            let couponAdd = (finalPrice/100) * 15
+            let couponSum = Number(localStorage.getItem('coupon'))
+            let couponAdd = (finalPrice/100) * couponSum
             finalPrice -= couponAdd;
         }
         this.setState({
@@ -30,34 +34,22 @@ class FinalDetails extends Component {
         })
     }
 
+    setDeliveries = async() => {
+        const response = await fetch("/deliveries", {
+            method: 'GET'
+        });
+        let myres = await response.json()
+        this.setState({
+            deliveries: myres
+        })
+    }
+
     validateDelivery = (event) => {
-        let deliveryMethod = event.target.id;
-        let newPrice;
-        switch (deliveryMethod) {
-            case "dropoff":
-                newPrice= Number(this.state.totalPrice) + 10
-                this.setState({
-                    delivery: "Dropoff Point ($10)",
-                    priceWithDelivery: newPrice
-                }, () => {this.props.setDelivery(10)})
-                break;
-            case "mail":
-                newPrice= Number(this.state.totalPrice) + 15
-                this.setState({
-                    delivery: "Mail ($15)",
-                    priceWithDelivery: newPrice
-                }, () => {this.props.setDelivery(15)})
-                break;
-            case "special":
-                newPrice= Number(this.state.totalPrice) + 25
-                this.setState({
-                    delivery: "Special Delivery ($25)",
-                    priceWithDelivery: newPrice
-                }, () => {this.props.setDelivery(25)})
-                break;
-            default:
-                break;
-        }
+        let newPrice = Number(this.state.totalPrice) + Number(event.target.value)
+        this.setState({
+            delivery: event.target.title,
+            priceWithDelivery: newPrice
+        }, () => {this.props.setDelivery(event.target.id)})
     }
 
     render () {
@@ -100,35 +92,21 @@ class FinalDetails extends Component {
                 </p>
                 <hr className="mx-6 border-yellow-800"/>
                 <h1>Choose a delivery method:</h1>
-                <input 
-                    type="radio" 
-                    id="dropoff" 
-                    name="delivery" 
-                    value="dropoff" 
-                    required 
-                    onChange={(event) => {this.validateDelivery(event)}}
-                />
-                <label htmlFor="dropoff">Dropoff Point - Two Weeks - 10$</label>
-                <br/>
-                <input 
-                    type="radio" 
-                    id="mail" 
-                    name="delivery" 
-                    value="mail" 
-                    required 
-                    onChange={(event) => {this.validateDelivery(event)}}
-                />
-                <label htmlFor="mail">Standard Mail Delivery - One to Two Weeks - 15$</label>
-                <br/>
-                <input 
-                    type="radio" 
-                    id="special" 
-                    name="delivery" 
-                    value="special" 
-                    required 
-                    onChange={(event) => {this.validateDelivery(event)}}
-                />
-                <label htmlFor="special">Personal Home Delivery - Five Days - 25$</label>
+                {this.state.deliveries && this.state.deliveries.map((delivery) => (
+                    <span>
+                        <input 
+                            type="radio" 
+                            id={delivery.id} 
+                            name="delivery" 
+                            value={delivery.Price} 
+                            title={delivery.Name}
+                            required 
+                            onChange={(event) => {this.validateDelivery(event)}}
+                        />
+                        <label htmlFor={delivery.id}>{delivery.Name} - {delivery.Duration} - {delivery.Price}$</label>
+                        <br/>
+                    </span>
+                ))}
                 {notice}
                 <hr className="mx-6 border-yellow-800"/>
                 <p className="pl-3 py-5">

@@ -10,7 +10,7 @@
 
 .items li {
     flex: 1 1 15rem;
-    height: 28rem;
+    height: 25rem;
     padding: 1rem;
     margin: 1rem;
 }
@@ -51,7 +51,7 @@
 }
 
 .product-price div {
-    font-size: 1.5rem;
+    font-size: 2rem;
 }
 
 .item-buttons {

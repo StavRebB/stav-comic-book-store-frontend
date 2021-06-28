@@ -11,16 +11,16 @@ class SignedCheckoutForms extends Component {
             input: null,
             page: 1,
             errorMessage: null,
-            fullName: this.props.curUser.lastName === "none" ? null : `${this.props.curUser.firstName} ${this.props.curUser.lastName}`,
-            phoneNum: this.props.curUser.phoneNum === "none" ? null : this.props.curUser.phoneNum,
-            email: this.props.curUser.email,
+            fullName: this.props.curUser.LastName === "none" ? null : `${this.props.curUser.FirstName} ${this.props.curUser.LastName}`,
+            phoneNum: this.props.curUser.PhoneNumber === "none" ? null : this.props.curUser.PhoneNumber,
+            email: this.props.curUser.Email,
             offers: "none",
-            firstName: this.props.curUser.firstName,
-            lastName: this.props.curUser.lastName === "none" ? null : this.props.curUser.lastName,
-            fullAd: this.props.curUser.address === "none" ? null : this.props.curUser.address,
-            zipCode: null,
-            city: this.props.curUser.city === "none" ? null : this.props.curUser.city,
-            country: this.props.curUser.country === "none" ? null : this.props.curUser.country,
+            firstName: this.props.curUser.FirstName,
+            lastName: this.props.curUser.LastName === "none" ? null : this.props.curUser.LastName,
+            fullAd: this.props.curUser.Address === "none" ? null : this.props.curUser.Address,
+            zipCode: this.props.curUser.ZipCode === "none" ? null : this.props.curUser.ZipCode,
+            city: this.props.curUser.City === "none" ? null : this.props.curUser.City,
+            country: this.props.curUser.Country === "none" ? null : this.props.curUser.Country,
             notes: "none",
             payment: null,
             cardNum: null,
@@ -403,6 +403,7 @@ class SignedCheckoutForms extends Component {
                         fullName: null,
                     })
                 }
+                break;
             case "phoneNum":
                 if(this.state.phoneNum === this.props.curUser.phoneNum) {
                     this.setState({
@@ -447,6 +448,13 @@ class SignedCheckoutForms extends Component {
                 break;
             case "country":
                 if(this.state.country === this.props.curUser.country) {
+                    this.setState({
+                        country: null,
+                    })
+                }
+                break;
+            case "zipCode":
+                if(this.state.country === this.props.curUser.zipCode) {
                     this.setState({
                         country: null,
                     })
@@ -674,7 +682,8 @@ class SignedCheckoutForms extends Component {
                                 type="text" 
                                 id="zipCode" 
                                 className="w-32" 
-                                required 
+                                placeholder={this.state.zipCode}
+                                onClick={(event) => {this.clearState(event)}}
                                 onBlur={(event) => {this.validateContent(event)}}
                             />
                             &nbsp;&nbsp;&nbsp;&nbsp;

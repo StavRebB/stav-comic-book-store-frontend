@@ -1,97 +1,82 @@
 import React, { Component } from 'react';
 import './ItemsToBuy.css';
-// import data from '../../data.json'
 import formatPrice from '../../utility/Price'
-// import axios from 'axios';
-import {db} from '../../../firebase'
 
 class ItemsToBuy extends Component {
     constructor(props) {
       super(props);
       this.state = {
-        // products: data.products,
         products: null,
         productList: [],
         productSum: null,
         coupon: "",
+        finalItems: [],
       }
     }
 
     componentDidMount = () => {
 
+        this.getAndSetItems()
+
+    }
+
+    getAndSetItems = async() => {
         let itemCodes;
         let myItems;
         let generalItems;
-        db.ref('products').on('value', (snapshot)=>{
-            let arr = [];
-            for (let obj in snapshot.val()) {
-              arr.push(snapshot.val()[obj])
+
+        const response = await fetch(`/products`, {
+            method: 'GET'
+        });
+        let myres = await response.json()
+
+        this.setState({
+            products: myres,
+        }, () => {
+            let itemArr = []
+            itemCodes = JSON.parse(localStorage.getItem("shoppingCart"))
+            myItems = [];
+            generalItems = [...this.state.products]
+            if (itemCodes !== null) {
+                generalItems.filter((product) => {
+                    if(itemCodes.includes(product.ISBN10)) {
+                        let obj = {id:product.id, amount: 1}
+                        itemArr.push(obj)
+                        myItems.push(product)
+                    }
+                    return true;
+                })
+                this.setState({
+                    finalItems:itemArr
+                },() => {
+                    this.props.setItems(this.state.finalItems)
+                })
+                let genSum = 0;
+                myItems.forEach((product) => {
+                    genSum += product.CurrentPrice;
+                })
+                this.setState({
+                    productList: myItems,
+                    productSum: genSum,
+                }, () => {
+                    this.getPrice()
+                })
             }
-            this.setState({
-                products: arr,
-            }, () => {
-                itemCodes = JSON.parse(localStorage.getItem("shoppingCart"))
-                myItems = [];
-                generalItems = [...this.state.products]
-                if (itemCodes !== null) {
-                    generalItems.filter((product) => {
-                        if(itemCodes.includes(product.ISBN10)) {
-                            myItems.push(product)
-                        }
-                        return true;
-                    })
-                    let genSum = 0;
-                    myItems.forEach((product) => {
-                        genSum += product.price;
-                    })
-                    this.setState({
-                        productList: myItems,
-                        productSum: genSum,
-                    }, () => {
-                        this.getPrice()
-                    })
-                }
-            })
-            
         })
-
-        // let self = this
-
-        // axios.get('http://localhost:3000/products')
-        // .then(function(response) {
-        //     self.setState({
-        //         products: response.data,
-        //     })
-        //     let itemCodes = JSON.parse(localStorage.getItem("shoppingCart"))
-        //     let myItems = [];
-        //     let generalItems = [...self.state.products]
-        //     if (itemCodes !== null) {
-        //         generalItems.filter((product) => {
-        //             if(itemCodes.includes(product.ISBN10)) {
-        //                 myItems.push(product)
-        //             }
-        //             return true;
-        //         })
-        //         let genSum = 0;
-        //         myItems.forEach((product) => {
-        //             genSum += product.price;
-        //         })
-        //         self.setState({
-        //             productList: myItems,
-        //             productSum: genSum,
-        //         }, () => {
-        //             self.getPrice()
-        //         })
-        //     }
-        // })
-        // .catch( function(error) {
-        //     console.log(error)
-        // })
     }
 
     changePrice = (event) => {
         let amnt = event.target.value;
         let productId = event.target.id;
+        let itemArr = [...this.state.finalItems]
+        for (let item of itemArr) {
+            if(item.id === productId) {
+                item.amount = Number(amnt)
+            }
+        }
+        this.setState({
+            finalItems: itemArr
+        },() => {this.props.setItems(this.state.finalItems)})
         let theProd;
         this.state.productList.forEach((product, index) => {
             if(product.ISBN10 === productId) {
@@ -99,24 +84,42 @@ class ItemsToBuy extends Component {
             }
         });
         let myProductList = [...this.state.productList];
-        myProductList[theProd].quantity = amnt;
+        myProductList[theProd].Quantity = amnt;
         this.setState({
             productList: myProductList,
         }, () => {
+            this.setNewItems()
             this.getPrice()
+        })
+    }
+
+    setNewItems = () => {
+        let itemsList = [...this.state.productList]
+        let amntArr = []
+        for(let item of itemsList) {
+            let obj = {id:item.id, amount: Number(item.Quantity)}
+            amntArr.push(obj)
+        }
+        this.setState({
+            finalItems: amntArr
+        }, () => {
+            this.props.setItems(this.state.finalItems)
         })
     }
 
     getPrice = () => {
         let genSum = 0;
         this.state.productList.forEach((product) => {
-            genSum += (product.price * product.quantity);
+            genSum += (product.CurrentPrice * product.Quantity);
         })
         this.setState({
             productSum: genSum,
         }, () => {
             this.props.getTotal(this.state.productSum)
         })
+        if(genSum === 0) {
+            localStorage.removeItem('coupon')
+        }
     }
 
     removeItem = (event) => {
@@ -134,7 +137,8 @@ class ItemsToBuy extends Component {
         this.setState({
             productList: newList,
         },() => {
-            this.getPrice();this.props.addToCart()
+            this.getPrice();
+            this.props.addToCart()
         })
     }
   
@@ -163,11 +167,11 @@ class ItemsToBuy extends Component {
                     >
                         <div className="col-span-2 row-span-1">
                             <img 
-                                src={product.image} 
-                                alt="" 
+                                src={product.MainImage ? `/photos/photoSrc/products/${product.MainImage}` : "https://via.placeholder.com/150x250"} 
+                                alt={product.Title} 
                                 className="cartImage float-left mr-5"
                             />
-                            <p className="text-4xl text-yellow-800">{product.title}</p>
+                            <p className="text-4xl text-yellow-800">{product.Title}</p>
                             <br/>
                             <p className="text-1xl">#{product.ISBN10}</p>
                         </div>
@@ -184,7 +188,7 @@ class ItemsToBuy extends Component {
                             />
                         </div>
                         <div className="col-span-1 text-3xl pt-12 ml-5 text-center">
-                            {formatPrice(product.price * product.quantity)}
+                            {formatPrice(product.CurrentPrice * product.Quantity)}
                         </div>
                         <div className="col-span-1 text-3xl pt-12 ml-5 text-center">
                             <button 

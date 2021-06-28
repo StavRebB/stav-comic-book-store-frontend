@@ -2,6 +2,53 @@ import React, { Component } from 'react';
 import './filters.css';
 
 class Filters extends Component {
+    constructor(props) {
+        super(props);
+        this.state = {
+            languages: null,
+            formats: null,
+            publishers: null
+        }
+    }
+
+    componentDidMount = () => {
+        this.getLanguages();
+        this.getPublishers();
+        this.getFormats();
+    }
+
+    getLanguages = async() => {
+        const response = await fetch("/languages", {
+            method: 'GET'
+        });
+        let myres = await response.json()
+        this.setState({
+            languages: myres,
+        })
+    }
+
+    getPublishers = async() => {
+        const response = await fetch("/publishers", {
+            method: 'GET'
+        });
+        let myres = await response.json()
+        this.setState({
+            publishers: myres,
+        })
+    }
+
+    getFormats = async() => {
+        const response = await fetch("/formats", {
+            method: 'GET'
+        });
+        let myres = await response.json()
+        this.setState({
+            formats: myres,
+        })
+    }
+
+
+    
   render () {
     return (
         <div className="filters text-xl">
@@ -16,50 +63,33 @@ class Filters extends Component {
                     onChange={this.props.filterLanguage}
                 >
                     <option value="">Any</option>
-                    <option value="English">English</option>
-                    <option value="Japanese">Japanese</option>
-                    <option value="Spanish">Spanish</option>
+                    {this.state.languages && this.state.languages.map(language => (
+                        <option key={language.id} value={language.id}>{language.Name}</option>
+                    ))}
                 </select>
             </div>
             <div className="filterFormat mx-4">
                 <p>
                     Format:
                 </p>
-                <input 
-                    type="radio" 
-                    id="any" 
-                    name="format" 
-                    value="" 
-                    onClick={this.props.filterFormat}
-                />
-                <label htmlFor="any">Any</label>
-                <br/>
-                <input 
-                    type="radio" 
-                    id="paperback" 
-                    name="format" 
-                    value="Paperback" 
-                    onClick={this.props.filterFormat}
-                />
-                <label htmlFor="paperback">Paperback</label>
-                <br/>
-                <input 
-                    type="radio" 
-                    id="hardcover" 
-                    name="format" 
-                    value="Hardcover" 
-                    onClick={this.props.filterFormat}
-                />
-                <label htmlFor="hardcover">Hardcover</label>
-                <br/>
-                <input 
-                    type="radio" 
-                    id="single" 
-                    name="format" 
-                    value="Single Issue" 
-                    onClick={this.props.filterFormat}
-                />
-                <label htmlFor="single">Single Issue</label>
+                <span>
+                    <input 
+                        type="radio" 
+                        id="any" 
+                        name="format" 
+                        value="" 
+                        onClick={this.props.filterFormat}
+                    />
+                    <label htmlFor="any">Any</label>
+                    <br/>
+                </span>
+                {this.state.formats && this.state.formats.map(format => (
+                        <span>
+                            <input type="radio" id={format.Name} name="format" value={format.id} key={format.id} onClick={this.props.filterFormat}/>
+                            <label htmlFor={format.Name}>{format.Name}</label>
+                            <br/>
+                        </span>
+                ))}
             </div>
             <div className="filterPublisher mx-4">
                 Publisher 
@@ -70,14 +100,9 @@ class Filters extends Component {
                     onChange={this.props.filterPublisher}
                 >
                     <option value="">Any</option>
-                    <option value="Marvel Comics">Marvel Comics</option>
-                    <option value="DC Comics">DC Comics</option>
-                    <option value="Dark Horse Comics">Dark Horse Comics</option>
-                    <option value="Image Comics">Image Comics</option>
-                    <option value="Dynamite Entertainment">Dynamite Entertainment</option>
-                    <option value="Pie International Co., Ltd.">Pie International</option>
-                    <option value="Malpaso Editorial">Malpaso Editorial</option>
-                    <option value="Shueisha/Tsai Fong Books">Shueisha/Tsai Fong Books</option>
+                    {this.state.publishers && this.state.publishers.map(publisher => (
+                        <option key={publisher.id} value={publisher.id}>{publisher.Name}</option>
+                    ))}
                 </select>
             </div>
             <div className="priceSort mx-4">

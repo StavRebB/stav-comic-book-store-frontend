@@ -1,9 +1,7 @@
 import React, { Component } from 'react';
 import './FinalForm.css';
-import formatPrice from '../../utility/Price'
-import formatPrecent from '../../utility/Pecent'
-import { Link } from "react-router-dom";
-import {db} from '../../../firebase'
+import formatPrice from '../utility/Price'
+import formatPrecent from '../utility/Pecent'
 
 class FinalForm extends Component {
     constructor() {
@@ -11,9 +9,13 @@ class FinalForm extends Component {
         this.state = {
             taxRate: 5,
             totalProductsSum: localStorage.getItem('finalPrice'),
-            coupon: ((localStorage.getItem('coupon')) ? "%15" : "None"),
+            coupon: ((localStorage.getItem('coupon') && localStorage.getItem('coupon') !== "0") ? `%${localStorage.getItem('coupon')}` : "None"),
             products: [],
             finalPrice: 0,
+            bodyRes: null,
+            couponid: null,
+            delworth: null,
+            delMethod: null,
         }
     }
 
@@ -22,73 +24,88 @@ class FinalForm extends Component {
         let addOn = (this.state.totalProductsSum/100) * this.state.taxRate;
         finalPrice = Number(this.state.totalProductsSum) + addOn;
         if (this.state.coupon !== "None") {
-            let couponAdd = (finalPrice/100) * 15
+            let couponWorth = Number(localStorage.getItem('coupon'))
+            let couponAdd = (finalPrice/100) * couponWorth
             finalPrice -= couponAdd;
-        }
-        if (this.props.delivery === 10) {
-            finalPrice += 10
-        } else if (this.props.delivery === 15) {
-            finalPrice += 15
-        } else {
-            finalPrice += 25
+            this.findCoupon(couponWorth)
         }
 
+        let deliveryFind = this.props.delivery
+
+        this.findDelivery(deliveryFind, finalPrice)
+    }
+
+    findCoupon = async(num) => {
+        const response = await fetch(`/coupons/finddiscount/${num}`, {
+            method: 'GET'
+        });
+        let myres = await response.json()
         this.setState({
-            finalPrice: finalPrice,
-        })
-
-        let items = JSON.parse(localStorage.getItem('shoppingCart'))
-        db.ref('products').on('value', (snapshot)=>{
-            let arr = [];
-            for (let obj in snapshot.val()) {
-                if(items.includes(obj)) {
-                    arr.push(snapshot.val()[obj])
-                }
-            }
-            this.setState({
-                products: arr,
-            }, () => {console.log(this.state.products)})
+            couponid: myres[0].id,
         })
     }
 
-    addOrder = () => {
+    findDelivery = async(delid,finalprice) => {
+        const response = await fetch(`/deliveries/${delid}`, {
+            method: 'GET'
+        });
+        let myres = await response.json()
+        this.setState({
+            delworth: myres.Price,
+            delMethod: `${myres.Name} ($${myres.Price})`,
+        }, () => {
+            finalprice +=  this.state.delworth
+            this.setState({
+                finalPrice: finalprice,
+            })
+        })
+    }
+
+    addOrder = async() => {
         let fakeHash = Date.now();
         this.props.orderNum(fakeHash)
-        let itemList = this.state.products
         let thisDate = new Date();
-        let orderDetails = {
-            id: fakeHash,
-            items: itemList,
-            orderDate: thisDate,
-            payerName: this.props.fullName,
-            phoneNum: this.props.phoneNum,
-            email: this.props.email,
-            recieverName:`${this.props.firstName} ${this.props.lastName}`,
-            fullAd: this.props.fullAd,
-            zipCode: this.props.zipCode,
-            city: this.props.city,
-            country: this.props.country,
-            notes: this.props.notes,
-            payment: this.props.payment,
-            delivery: this.props.delivery,
-            price: this.state.finalPrice,
-            status: "Processing"
-        }
 
-        db.ref('orders/' + fakeHash).set({
-            ...orderDetails
-        })
-        .then(() => {
+        const response = await fetch("/orders", {
+            method: 'POST',
+            headers: {
+                "Accept": "application/json",
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ 
+                PayerName: this.props.fullName,
+                OrderNum: fakeHash,
+                OrderDate: thisDate,
+                Email: this.props.email,
+                RecieverName: `${this.props.firstName} ${this.props.lastName}`,
+                Address: this.props.fullAd,
+                ZipCode: this.props.zipCode,
+                Country: this.props.country,
+                Payment: this.props.payment,
+                Products: this.props.items,
+                PhoneNumber: this.props.phoneNum,
+                Sum: this.state.finalPrice,
+                City: this.props.city,
+                Delivery: this.props.delivery,
+                Coupon: this.state.couponid,
+                Refund: false,
+                Notes: this.props.notes
+            }),
+        });
+
+        const body = await response.text();
+        this.setState({
+            bodyRes: body
+        }, () => {
             this.props.history.push('/confirmation')
         })
-        .catch((error) => {console.log(error)});
     }
 
 
   render () {
 
     let offers;
-    if (this.props.offers !== "none") {
+    if (this.props.offers !== false) {
         offers = 
             <p>
                 <i className="far fa-check-circle"/>
@@ -110,28 +127,11 @@ class FinalForm extends Component {
     }
 
     let deliver;
-    if (this.props.delivery === 10) {
-        deliver = <p>Delivery Method: Dropoff Point ($10)</p>
-    } else if (this.props.delivery === 15) {
-        deliver = <p>Delivery Method: Mail ($15)</p>
+    if(this.state.delMethod === null) {
+        deliver = <p>Delivery Method: </p>
     } else {
-        deliver = <p>Delivery Method: Special Delivery ($25)</p>
+        deliver = <p>Delivery Method: {this.state.delMethod}</p>
     }
-
-    // let finalPrice;
-    // let addOn = (this.state.totalProductsSum/100) * this.state.taxRate;
-    // finalPrice = Number(this.state.totalProductsSum) + addOn;
-    // if (this.state.coupon !== "None") {
-    //     let couponAdd = (finalPrice/100) * 15
-    //     finalPrice -= couponAdd;
-    // }
-    // if (this.props.delivery === 10) {
-    //     finalPrice += 10
-    // } else if (this.props.delivery === 15) {
-    //     finalPrice += 15
-    // } else {
-    //     finalPrice += 25
-    // }
 
     let paymentMethod;
     if (this.props.payment === "cash") {
@@ -201,16 +201,14 @@ class FinalForm extends Component {
                 &nbsp;&nbsp;&nbsp;&nbsp;
                 <span>Coupon: {this.state.coupon}</span>
                 &nbsp;&nbsp;&nbsp;&nbsp;
-                {deliver}
-                <span>Total Pirce: {formatPrice(this.state.finalPrice)}</span>
+                {this.state.delMethod && deliver}
+                <span>Total Price: {formatPrice(this.state.finalPrice)}</span>
             </div>
             <hr className="border-yellow-800 my-6"/>
             <div className="placeOrder text-right">
-                {/* <Link to="/confirmation"> */}
                     <button className="bg-yellow-800 text-yellow-100 rounded px-4 py-2 hover:bg-yellow-100 hover:text-yellow-800 border border-yellow-800" onClick={() => {this.addOrder()}}>
                         Place Order
                     </button>
-                {/* </Link> */}
             </div>
         </div>
     </main>

@@ -28,7 +28,6 @@ class AddProduct extends Component {
 
     handleForm = (event) => {
         event.preventDefault();
-        console.log(this.state)
         this.addProductToDB();
     }
 
@@ -68,8 +67,6 @@ class AddProduct extends Component {
             this.props.history.push('/account/profile')
         })
         .catch((error) => {console.log(error)});
-
-        console.log(this.props)
     }
 
     addToState = (event) => {

@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import FirstForm from './FirstForm/FirstForm';
-import FinalDetails from '../FinalDetails/FinalDetails';
+import FinalDetails from './FinalDetails/FinalDetails';
 import './Checkout.css';
 
 class Checkout extends Component {

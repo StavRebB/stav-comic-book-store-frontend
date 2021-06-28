@@ -2,13 +2,13 @@ import React, { Component } from 'react';
 import './AccountProfile.css';
 import ProfileCard from './ProfileCard/ProfileCard';
 import ProfileForm from './ProfileForm/ProfileForm';
-import {db} from '../../firebase'
 
 class AccountProfile extends Component {
     constructor(props) {
         super(props);
         this.state = {
             usersList: [],
+            userId: null,
             firstName: "someName",
             lastName: "someLastName",
             email: "email@website.com",
@@ -17,7 +17,9 @@ class AccountProfile extends Component {
             city: "someCity",
             address: "address",
             password: "******",
-            role: 2,
+            zipCode:'none',
+            DOB: null,
+            role: "606b3a27b75b923d58cee841",
         }
     }
 
@@ -27,33 +29,28 @@ class AccountProfile extends Component {
 
     }
 
-    updateState = () => {
+    updateState = async() => {
 
-        db.ref('users').on('value', (snapshot)=>{
-            let arr = [];
-            for (let obj in snapshot.val()) {
-                arr.push(snapshot.val()[obj])
-            }
+        let currEmail = localStorage.getItem('currentUser')
 
-            let currEmail = localStorage.getItem('currentUser')
-
-            for (let item of arr) {
-                if(item.email === currEmail) {
-                    this.setState({
-                        firstName: item.firstName,
-                        lastName: item.lastName,
-                        email: item.email,
-                        phoneNum: item.phoneNum,
-                        country: item.country,
-                        city: item.city,
-                        address: item.address,
-                        password: item.password,
-                        role: item.role
-                    })
-                }
-            }
+        const response = await fetch(`/members/email/${currEmail}`, {
+            method: 'GET'
+        });
+        let myres = await response.json()
+        this.setState({
+            usersList: myres,
+            userId: myres.id,
+            firstName: myres.FirstName,
+            lastName: myres.LastName,
+            email: myres.Email,
+            phoneNum: myres.PhoneNumber,
+            country: myres.Country,
+            city: myres.City,
+            address: myres.Address,
+            zipCode: myres.ZipCode,
+            DOB: myres.DateOfBirth,
+            role: myres.Role,
         })
-
     }
 
     isUserSignedInCB = (bool) => {
@@ -69,7 +66,7 @@ class AccountProfile extends Component {
         return(    
             <main className="AccountProfile ml-96 mt-20">
                 <div className="profileCard">
-                    <ProfileCard firstName={this.state.firstName} lastName={this.state.lastName} email={this.state.email} phoneNum={this.state.phoneNum} country={this.state.country} city={this.state.city} history={this.props.history} role={this.state.role} isUserSignedIn={this.isUserSignedInCB}/>
+                    <ProfileCard userId={this.state.userId} firstName={this.state.firstName} lastName={this.state.lastName} email={this.state.email} phoneNum={this.state.phoneNum} country={this.state.country} city={this.state.city} history={this.props.history} role={this.state.role} dateOfBirth={this.state.DOB} zipCode={this.state.zipCode} isUserSignedIn={this.isUserSignedInCB}/>
                 </div>
                 <div className="profileForm">
                     <ProfileForm email={this.state.email} updateState={this.updateState} curUserName={this.curUserNameCB}/>

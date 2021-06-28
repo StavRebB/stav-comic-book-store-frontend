@@ -2,9 +2,6 @@ import React, { Component } from 'react';
 import './Header.css';
 import { Link } from "react-router-dom";
 import CartQuickView from './CartQuickView/CartQuickView';
-// import axios from 'axios';
-import {db} from '../../firebase'
-// import CurrAuth from '../../auth';
 
 class Header extends Component{
     constructor(props) {
@@ -30,21 +27,17 @@ class Header extends Component{
         });
     };
 
-    componentDidMount = () => {
+    componentDidMount = async() => {
 
-        db.ref('products').on('value', (snapshot)=>{
-            let arr = [];
-            for (let obj in snapshot.val()) {
-              arr.push(snapshot.val()[obj])
-            }
-            this.setState({
-                products: arr,
-            })
+        const response = await fetch("/products", {
+            method: 'GET'
+        });
+        let myres = await response.json()
+        this.setState({
+            products: myres
         })
 
         let signInAuth = localStorage.getItem('signIn')
-
-        console.log(typeof signInAuth)
 
         if (signInAuth === "true") {
             this.props.isUserSignedIn(true)
@@ -187,9 +180,6 @@ class Header extends Component{
                 </li>
                 <li className="nav-item">
                     <span className="px-3 py-2 flex items-center text-lg uppercase leading-snug text-white hover:opacity-75">
-                        {/* <Link> */}
-                            {/* <i className="far fa-heart text-lg leading-none text-white hover:opacity-75" />  */}
-                        {/* </Link> */}
                     </span>
                 </li>
                 </ul>

@@ -22,24 +22,27 @@ const MyGoogleMap = withScriptjs(
                     <InfoWindow>
                         <div className="pl-4">
                             <h2 className="text-xl text-center">
-                                Lorem Ipsum
+                                {props.name}
                             </h2>
                             <p>
                                 Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec sit amet tincidunt sapien, sit amet convallis sem. Proin sed finibus mauris, 
                                 vitae aliquam metus. Praesent imperdiet quam nec lorem laoreet.
                             </p>
                             <p>
-                                Sit amet 48 consectetur 13553
+                                {props.address} {props.zipcode}
                             </p>
                             <p>
-                                Tel.: 077-8956434
+                                {props.city}, {props.country}
+                            </p>
+                            <p>
+                                Tel.: {props.phone}
                             </p>
                             <p>
                                 <a 
                                     href="#homepage" 
                                     className="underline text-blue-400"
                                 >
-                                    Homepage
+                                    {props.title}
                                 </a>
                             </p>
                             <img 
@@ -75,6 +78,13 @@ export default class Map extends React.Component {
             <div>
                 <MyGoogleMap
                     isOpen = {this.state.isOpen}
+                    title = "Homepage"
+                    address = {this.props.address}
+                    name = {this.props.name}
+                    zipcode = {this.props.zipcode}
+                    city = {this.props.city}
+                    country = {this.props.country}
+                    phone = {this.props.phone}
                     onToggleOpen = {this.onToggleOpen}
                     loadingElement={<div>Loading....</div>}
                     containerElement={

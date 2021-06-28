@@ -1,6 +1,5 @@
 import React, { Component } from 'react';
 import './ProfileForm.css';
-import {auth, db} from '../../../firebase'
 import firebase from 'firebase/app'
 
 class ProfileForm extends Component {
@@ -22,7 +21,13 @@ class ProfileForm extends Component {
             newCity:null,
             address: null,
             newAddress: null,
+            DOB: null,
+            newDOB: null,
+            zipCode: null,
+            newZipCode:null,
             errorMessage: null,
+            successMessage:null,
+            body:null,
         }
     }
 
@@ -30,29 +35,25 @@ class ProfileForm extends Component {
         this.getDetails()
     }
 
-    getDetails = () => {
-        db.ref('users').on('value', (snapshot)=>{
-            let arr = [];
-            for (let obj in snapshot.val()) {
-                arr.push(snapshot.val()[obj])
-            }
+    getDetails = async() => {
 
-            let currEmail = localStorage.getItem('currentUser')
+        let currEmail = localStorage.getItem('currentUser')
 
-            for (let item of arr) {
-                if(item.email === currEmail) {
-                    this.setState({
-                        userId: item.id,
-                        firstName: item.firstName,
-                        lastName: item.lastName,
-                        email: item.email,
-                        phoneNumber: item.phoneNum,
-                        country: item.country,
-                        city: item.city,
-                        address: item.address,
-                    })
-                }
-            }
+        const response = await fetch(`/members/email/${currEmail}`, {
+            method: 'GET'
+        });
+        let myres = await response.json()
+        this.setState({
+            userId: myres.id,
+            firstName: myres.FirstName,
+            lastName: myres.LastName,
+            email: myres.Email,
+            phoneNumber: myres.PhoneNumber,
+            country: myres.Country,
+            city: myres.City,
+            address: myres.Address,
+            zipCode: myres.ZipCode,
+            DOB: myres.DateOfBirth ? myres.DateOfBirth.split('T')[0] : null
         })
     }
 
@@ -69,12 +70,14 @@ class ProfileForm extends Component {
         return true;
     }
 
-    updateMyProfile = () => {
+    updateMyProfile = async() => {
 
         let newObj = {}
+        let newDeets = {}
 
-        if (this.state.newFN && this.state.newFN !== this.state.firstName) {
+        if (this.state.newFN && this.state.newFN !== "none" && this.state.newFN !== this.state.firstName) {
             newObj.firstName = this.state.newFN
+            newDeets.FirstName = this.state.newFN
 
             let user = firebase.auth().currentUser;
 
@@ -85,22 +88,49 @@ class ProfileForm extends Component {
                 this.props.curUserName(this.state.newFN)
                 localStorage.setItem('userName',this.state.newFN)
             })
+        } else if(this.state.newFN === "none") {
+            this.setState({
+                errorMessage:
+                    <h1 className="text-3xl text-red-600 text-center pb-5">
+                        <i className="far fa-times-circle"></i> 
+                        First name must contain more than 1 character
+                    </h1>
+            },() => {
+                setTimeout(() => {
+                    this.setState({
+                        errorMessage: null
+                    })
+                }, 5000);
+            })
         }
 
-        if (this.state.newLN && this.state.newLN !== this.state.lastName) {
+        if (this.state.newLN && this.state.newLN !== "none" && this.state.newLN !== this.state.lastName) {
             newObj.lastName = this.state.newLN
+            newDeets.LastName = this.state.newLN
+        } else if(this.state.newLN === "none") {
+            this.setState({
+                errorMessage:
+                    <h1 className="text-3xl text-red-600 text-center pb-5">
+                        <i className="far fa-times-circle"></i> 
+                        Last name must contain more than 1 character
+                    </h1>
+            },() => {
+                setTimeout(() => {
+                    this.setState({
+                        errorMessage: null
+                    })
+                }, 5000);
+            })
         }
 
-        if (this.state.newEmail && this.state.newEmail !== this.state.email) {
+        if (this.state.newEmail && this.state.newEmail !== "none" && this.state.newEmail !== this.state.email) {
             newObj.email = this.state.newEmail
+            newDeets.Email = this.state.newEmail
 
             let user = firebase.auth().currentUser;
 
-            console.log(user)
-
             user.updateEmail(this.state.newEmail)
             .then(() => {
-                console.log(user)
                 localStorage.setItem('currentUser', this.state.newEmail)
             })
             .catch((error) => {
@@ -109,44 +139,153 @@ class ProfileForm extends Component {
                     errorMessage: <h3 className="text-3xl text-red-600 text-center pb-5"><i className="far fa-times-circle"></i> {error.message}</h3>
                 })
             })
+        } else if(this.state.newEmail === "none") {
+            this.setState({
+                errorMessage:
+                    <h1 className="text-3xl text-red-600 text-center pb-5">
+                        <i className="far fa-times-circle"></i> 
+                        Invalid email address
+                    </h1>
+            },() => {
+                setTimeout(() => {
+                    this.setState({
+                        errorMessage: null
+                    })
+                }, 5000);
+            })
         }
 
-        if (this.state.newPN && this.state.newPN !== this.state.phoneNumber) {
+        if (this.state.newPN && this.state.newPN !== "none" && this.state.newPN !== this.state.phoneNumber) {
             newObj.phoneNum = this.state.newPN
+            newDeets.PhoneNumber = this.state.newPN
+        } else if(this.state.newPN === "none") {
+            this.setState({
+                errorMessage:
+                    <h1 className="text-3xl text-red-600 text-center pb-5">
+                        <i className="far fa-times-circle"></i> 
+                        Phone Nummbers need to be written in the following format: XX(X)-XXXXXXX
+                    </h1>
+            },() => {
+                setTimeout(() => {
+                    this.setState({
+                        errorMessage: null
+                    })
+                }, 5000);
+            })
         }
 
-        if (this.state.newCountry && this.state.newCountry !== this.state.country) {
+        if (this.state.newCountry && this.state.newCountry !== "none" && this.state.newCountry !== this.state.country) {
             newObj.country = this.state.newCountry
+            newDeets.Country = this.state.newCountry
+        } else if(this.state.newCountry === "none") {
+            this.setState({
+                errorMessage:
+                    <h1 className="text-3xl text-red-600 text-center pb-5">
+                        <i className="far fa-times-circle"></i> 
+                        Country names must contain more than 1 character
+                    </h1>
+            },() => {
+                setTimeout(() => {
+                    this.setState({
+                        errorMessage: null
+                    })
+                }, 5000);
+            })
         }
 
-        if (this.state.newCity && this.state.newCity !== this.state.city) {
+        if (this.state.newCity && this.state.newCity !== "none" && this.state.newCity !== this.state.city) {
             newObj.city = this.state.newCity
+            newDeets.City = this.state.newCity
+        } else if(this.state.newCity === "none") {
+            this.setState({
+                errorMessage:
+                    <h1 className="text-3xl text-red-600 text-center pb-5">
+                        <i className="far fa-times-circle"></i> 
+                        City names must contain more than 1 character
+                    </h1>
+            },() => {
+                setTimeout(() => {
+                    this.setState({
+                        errorMessage: null
+                    })
+                }, 5000);
+            })
         }
 
-        if (this.state.newAddress && this.state.newAddress !== this.state.address) {
+        if (this.state.newAddress && this.state.newAddress !== "none" && this.state.newAddress !== this.state.address) {
             newObj.address = this.state.newAddress
+            newDeets.Address = this.state.newAddress
+        } else if(this.state.newAddress === "none") {
+            this.setState({
+                errorMessage:
+                    <h1 className="text-3xl text-red-600 text-center pb-5">
+                        <i className="far fa-times-circle"></i> 
+                        City names must contain more than 3 characters
+                    </h1>
+            },() => {
+                setTimeout(() => {
+                    this.setState({
+                        errorMessage: null
+                    })
+                }, 5000);
+            })
+        }
+
+        if (this.state.newZipCode && this.state.newZipCode !== "none" && this.state.newZipCode !== this.state.zipCode) {
+            newObj.zipCode = this.state.newZipCode
+            newDeets.ZipCode = this.state.newZipCode
+        } else if(this.state.newZipCode === "none") {
+            this.setState({
+                errorMessage:
+                    <h1 className="text-3xl text-red-600 text-center pb-5">
+                        <i className="far fa-times-circle"></i> 
+                        Zip codes must be exactly 5 digits long
+                    </h1>
+            },() => {
+                setTimeout(() => {
+                    this.setState({
+                        errorMessage: null
+                    })
+                }, 5000);
+            })
+        }
+
+        if (this.state.newDOB && this.state.newDOB !== this.state.DOB) {
+            newObj.dateOfBirth = this.state.newDOB
+            newDeets.DateOfBirth = this.state.DateOfBirth
         }
 
         if(Object.keys(newObj).length) {
-            let user = firebase.auth().currentUser;
 
-            console.log(user)
+            const response = await fetch(`/members/${this.state.userId}`, {
+                method: 'PATCH',
+                headers: {
+                    "Accept": "multipart/form-data",
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(newDeets),
+            });
+    
+            const body = await response.text();
 
-            db.ref().child("users").child(this.state.userId).update(
-                {
-                    ...newObj
-                }
-            )
+            this.setState({
+                body: body,
+                successMessage:
+                    <h1 className="text-3xl text-green-600 text-center pb-5"> 
+                        <i class="far fa-check-circle"></i>
+                        Personal profile updates
+                    </h1>
+            },() => {
+                setTimeout(() => {
+                    this.setState({
+                        successMessage: null
+                    })
+                }, 5000);
+            })
+
         }
 
         this.props.updateState()
-
-        // let user = firebase.auth().currentUser;
-
-        // user.updateProfile({
-        //     email: this.state.newEmail
-        // })
-        // .then(() => {console.log("success")})
 
     }
 
@@ -162,7 +301,7 @@ class ProfileForm extends Component {
                     })
                 } else {
                     this.setState({
-                        newFN: null,
+                        newFN: "none",
                     })
                 }
                 break;
@@ -173,7 +312,7 @@ class ProfileForm extends Component {
                     })
                 } else {
                     this.setState({
-                        newLNN: null,
+                        newLNN: "none",
                     })
                 }
                 break;
@@ -186,12 +325,12 @@ class ProfileForm extends Component {
                     })
                 } else {
                     this.setState({
-                        newEmail: null,
+                        newEmail: "none",
                     })
                 }
                 break;
             case "phoneNum":
-                validation = /^[0-9]{2,3}-[0-9]{7}$/
+                validation = /^[0-9]{2,3}-[0-9]{7}$/ //eslint-disable-line
                 exp = event.target.value
                 if(validation.test(exp)) {
                     this.setState({
@@ -199,7 +338,7 @@ class ProfileForm extends Component {
                     })
                 } else {
                     this.setState({
-                        newPN: null,
+                        newPN: "none",
                     })
                 }
                 break;
@@ -210,7 +349,7 @@ class ProfileForm extends Component {
                     })
                 } else {
                     this.setState({
-                        newCountry: null,
+                        newCountry: "none",
                     })
                 }
                 break;
@@ -221,7 +360,7 @@ class ProfileForm extends Component {
                     })
                 } else {
                     this.setState({
-                        newCity: null,
+                        newCity: "none",
                     })
                 }
                 break;
@@ -232,9 +371,25 @@ class ProfileForm extends Component {
                     })
                 } else {
                     this.setState({
-                        newAddress: null,
+                        newAddress: "none",
                     })
                 }
+                break;
+            case "zipCode":
+                if(Number(event.target.value) > 9999 && Number(event.target.value) < 100000) {
+                    this.setState({
+                        newZipCode: event.target.value
+                    })
+                } else {
+                    this.setState({
+                        newZipCode: "none",
+                    })
+                }
+                break;
+            case "dob":
+                this.setState({
+                    newDOB: event.target.value
+                })
                 break;
             default:
                 break;
@@ -243,7 +398,6 @@ class ProfileForm extends Component {
 
 
     render () {
-        console.log("auth:", auth.currentUser)
 
         return(    
             <main className="ProfileForm">
@@ -252,7 +406,7 @@ class ProfileForm extends Component {
                     <h3 className="text-2xl">You can change your personal details</h3>
                     <hr className="border-yellow-800 my-4"/>
                     <form className="text-2xl" onSubmit={(event) => {this.handleForm(event)}}>
-                        <div className="grid gap-y-6 grid-cols-2 grid-rows-4 pb-2">
+                        <div className="grid gap-y-6 grid-cols-2 grid-rows-5 pb-2">
                             <div>
                                 <label htmlFor="firstName">First Name:</label>
                                 <br/>
@@ -274,6 +428,11 @@ class ProfileForm extends Component {
                                 <input type="text" className="w-10/12 h-10 border border-gray-400 px-2 py-1" id="phoneNum" defaultValue={this.state.phoneNumber} onChange={(event) => {this.changeState(event)}}/>
                             </div>
                             <div>
+                                <label htmlFor="dob">Date of Birth:</label>
+                                <br/>
+                                <input type="date" className="w-10/12 h-10 border border-gray-400 px-2 py-1" id="dob" defaultValue={this.state.DOB} onChange={(event) => {this.changeState(event)}}/>
+                            </div>
+                            <div>
                                 <label htmlFor="country">Country:</label>
                                 <br/>
                                 <input type="text" className="w-10/12 h-10 border border-gray-400 px-2 py-1" id="country" defaultValue={this.state.country} onChange={(event) => {this.changeState(event)}}/>
@@ -283,11 +442,20 @@ class ProfileForm extends Component {
                                 <br/>
                                 <input type="text" className="w-10/12 h-10 border border-gray-400 px-2 py-1" id="city" defaultValue={this.state.city} onChange={(event) => {this.changeState(event)}}/>
                             </div>
+                            <div>
+                                <label htmlFor="zipCode">Zip Code:</label>
+                                <br/>
+                                <input type="text" className="w-10/12 h-10 border border-gray-400 px-2 py-1" id="zipCode" defaultValue={this.state.zipCode} onChange={(event) => {this.changeState(event)}}/>
+                            </div>
                             <div className="col-span-2">
                                 <label htmlFor="address">Address:</label>
                                 <br/>
                                 <input type="text" className="w-11/12 h-10 border border-gray-400 px-2 py-1" id="address" defaultValue={this.state.address} onChange={(event) => {this.changeState(event)}}/>
                             </div>
+                        </div>
+                        <div className="my-4">
+                            {this.state.errorMessage}
+                            {this.state.successMessage}
                         </div>
                         <hr className="border-yellow-800 my-4"/>
                         <div className="text-right">

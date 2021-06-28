@@ -33,7 +33,6 @@ class LoginPage extends Component {
     }
 
     render () {
-        console.log(this.props.history)
         return(    
             <main className="LoginPage pt-64">
                 <div className="bg-gray-300 mx-auto w-1/3 text-center text-3xl shadow shadow-md border-4 rounded border-solid border-8 border-gray-400">

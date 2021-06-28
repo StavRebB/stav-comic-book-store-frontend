@@ -1,3 +1,7 @@
 .TrackOrder{
     min-height: 86.4vh;
 }
+
+thead {
+    text-align: left;
+}

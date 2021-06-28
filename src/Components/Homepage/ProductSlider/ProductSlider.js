@@ -3,8 +3,6 @@ import './ProductSlider.css';
 import formatPrice from '../../utility/Price';
 import formatStars from '../../utility/Stars';
 import Modal from './ProductQuickview/ProductQuickview.js';
-import axios from 'axios';
-import {db} from '../../../firebase'
 
 class ProductSlider extends Component {
 
@@ -13,42 +11,52 @@ class ProductSlider extends Component {
         this.state = {
             show: false,
             myTitle: null,
-            products: null
+            products: null,
+            moreProds: null,
+            bought: null,
         };
         this.showModal = this.showModal.bind(this);
         this.hideModal = this.hideModal.bind(this);
     };
 
     componentDidMount = () => {
-        db.ref('products').on('value', (snapshot)=>{
-            let arr = [];
-            for (let obj in snapshot.val()) {
-                arr.push(snapshot.val()[obj])
-            }
+        if (this.props.slideId === "top") {
+            this.getTops()
+        } else if (this.props.slideId === "new") {
+            this.getNews()
+        } else if (this.props.slideId === "slide") {
+            this.getSpecials()
+        }
+        this.props.addSum()
+    }
 
-            let currArr = [];
-            for (let object of arr) {
-                if(this.props.slideId === "slide") {
-                    if (object.special === true && currArr.length < 6) {
-                        currArr.push(object)
-                        console.log(currArr)
-                    }
-                } else if (this.props.slideId === "new" && currArr.length < 6) {
-                    if (object.new === true) {
-                        currArr.push(object)
-                        console.log(currArr)
-                    }
-                } else if (this.props.slideId === "top" && currArr.length < 6) {
-                    if (object.top === true) {
-                        currArr.push(object)
-                        console.log(currArr)
-                    }
-                }
-            }
+    getTops = async() => {
+        const response = await fetch(`/products/tops`, {
+            method: 'GET'
+        });
+        let myres = await response.json()
+        this.setState({
+            products: myres.slice(0,6)
+        })
+    }
 
-            this.setState({
-                products: currArr,
-            })
+    getNews = async() => {
+        const response = await fetch(`/products/news`, {
+            method: 'GET'
+        });
+        let myres = await response.json()
+        this.setState({
+            products: myres.slice(0,6)
+        })
+    }
+
+    getSpecials = async() => {
+        const response = await fetch(`/products/specials`, {
+            method: 'GET'
+        });
+        let myres = await response.json()
+        this.setState({
+            products: myres.slice(0,6)
         })
     }
 
@@ -62,11 +70,14 @@ class ProductSlider extends Component {
         let lengthList = myList.length
         localStorage.setItem('shoppingCart',JSON.stringify(myList))
         localStorage.setItem('shoppingLength',lengthList)
+        setTimeout(() => {
+            window.location.reload()
+        }, 1000);
+        this.setState(this.state)
     }
 
 
     showModal = (e) => {
-        console.log(e.target)
         this.setState({ show: true, myTitle:e.target.textContent });
     };
     
@@ -79,30 +90,19 @@ class ProductSlider extends Component {
             <div>
                 <div className="slider mx-auto my-10">
 
-                    <a href={`#${this.props.slideId}-0`} className="text-2xl bg-yellow-100 text-yellow-700 border-4 border-yellow-700 focus:border-opacity-0 hover:border-opacity-0">
-                        &laquo;
-                    </a>
-                    <a href="#slide-2" className="opacity-0">2</a>
-                    <a href="#slide-3" className="opacity-0">3</a>
-                    <a href="#slide-4" className="opacity-0">4</a>
-                    <a href="#slide-4" className="opacity-0">5</a>
-                    <a href={`#${this.props.slideId}-5`} className="text-2xl bg-yellow-100 text-yellow-700 border-4 border-yellow-700 focus:border-opacity-0 hover:border-opacity-0">
-                        &raquo;
-                    </a>
-
                     <div className="slides">
                         {this.state.products && this.state.products.map( (product, index) => {
                             return (
                                 <div className="text-xl" id={`${this.props.slideId}-${index}`} key={product.ISBN10}>
-                                    <img src={product.image} width="50px" alt="somepic" className="itemImage h-auto w-1/3 mx-auto mt-4" />
+                                    <img src={product.MainImage ? `/photos/photoSrc/products/${product.MainImage}` : "https://via.placeholder.com/150x250"} width="100px" alt="somepic" className="itemImage h-auto w-1/3 mx-auto mt-4" />
                                     <p className="mx-auto text-xl text-yellow-700 cursor-pointer" onClick={this.showModal}>
-                                        {product.title}
+                                        {product.Title}
                                     </p>
                                     <p>
-                                        {formatPrice(product.price)}
+                                        {formatPrice(product.CurrentPrice)}
                                     </p>
                                     <p className="text-yellow-500">
-                                        {formatStars(product.stars)}
+                                        {formatStars(product.Stars)}
                                     </p>
                                 </div>
                             )

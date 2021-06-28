@@ -4,6 +4,10 @@
     background-color: #1F2937 !important
 }
 
+.big, .MuiDrawer-root, .RaLayout-content-93, .RaLayout-root-90, #main-content, .layout {
+    background-color: #1F2937 !important
+}
+
 .MuiToolbar-root {
     background-color: #FDE68A !important;
 }

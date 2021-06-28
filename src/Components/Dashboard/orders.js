@@ -1,132 +1,135 @@
 import * as React from "react";
 import {
-    Filter,
     List,
     Datagrid,
     TextField,
-    EmailField,
     EditButton,
     Edit,
-    Create,
     SimpleForm,
-    ReferenceInput,
     SelectInput,
     TextInput,
-    Toolbar,
-    SaveButton,
-    DeleteWithConfirmButton,
-    required,
-    ReferenceField,
-    BooleanInput,
-    DateInput,
-    PasswordInput,
-    email,
-    minLength,
     ArrayField,
     ChipField,
-    SimpleFormIterator,
     SingleFieldList,
     ShowButton, 
-    SelectField,
     TabbedShowLayout,
     Tab,
-    Show
+    Show,
+    ReferenceField,
+    BooleanField,
+    ReferenceInput,
+    BooleanInput,
+    DateField
 } from 'react-admin';
-import Chip from '@material-ui/core/Chip'
 
 const OrderID = ({ record }) => {
     return <span>Order {record ? `"${record.id}"` : ''}</span>;
 };
 
+const MyPriceField = ({ record = {}, source }) => {
+    let price = Number.parseFloat(record[source]).toFixed(2)
+    return (
+        <span>
+            {price}$
+        </span>
+    );
+}
+
 export const OrderList = props => (
         <List {...props}>
         <Datagrid rowClick="edit">
             <TextField source="id" />
-            <TextField source="payerName" />
-            <TextField source="recieverName" />
-            <EmailField source="email" />
-            <TextField source="fullAd" />
-            <TextField source="city" />
-            <TextField source="payment" />
-            <TextField source="phoneNum" />
-            <ArrayField source="items">
+            <TextField source="OrderNum" />
+            <TextField source="RecieverName" />
+            <DateField source="OrderDate"/>
+            <TextField source="Country" />
+            <TextField source="Payment" />
+            <ArrayField source="Products">
                 <SingleFieldList>
                     <ChipField source="id" />
                 </SingleFieldList>
-            </ArrayField>            
-            <SelectField source="status" choices={[
-                { id: 'Processing', name: 'Processing' },
-                { id: 'Sent', name: 'Sent' },
-                { id: 'Arrived', name: 'Arrived' },
-                { id: 'Returned', name: 'Returned' },
-                { id: 'Cancelled', name: 'Cancelled' },
-                { id: 'Refunded', name: 'Refunded' },
-            ]} />
+            </ArrayField>
+            <MyPriceField source="Sum" />
+            <ReferenceField source="Status" reference="status">
+                <TextField source="Name"/>
+            </ReferenceField>
+            <ReferenceField source="Delivery" reference="deliveries">
+                <TextField source="Name"/>
+            </ReferenceField> 
+            <ReferenceField source="Coupon" reference="coupons">
+                <TextField source="Code"/>
+            </ReferenceField> 
+            <BooleanField source="Refund" />                 
             <ShowButton/>
-            <EditButton />
-            <DeleteWithConfirmButton/>
+           <EditButton />
         </Datagrid>
     </List>
 );
 
-export const OrderEdit = props => (
+export const OrderEdit = props => {
+    return (
     <Edit title={<OrderID />} {...props}>
         <SimpleForm>
-            <TextInput disabled source="id" />
-            <TextInput source="payerName" validate={[required()]}/>
-            <TextInput source="payment" validate={[required()]}/>
-            <TextInput source="price" validate={[required()]}/>
-            <TextInput source="recieverName" validate={[required()]}/>
-            <TextInput source="email" validate={[required()]}/>
-            <TextInput source="fullAd" validate={[required()]}/>
-            <TextInput source="city" validate={[required()]}/>
-            <TextInput source="country" validate={[required()]}/>
-            <TextInput source="zipCode" validate={[required()]}/>
-            <TextInput source="phoneNum" validate={[required()]}/>
-            <TextInput source="notes" validate={[required()]}/>
-            <SelectInput source="status" validate={[required()]} choices={[
-                { id: 'Processing', name: 'Processing' },
-                { id: 'Sent', name: 'Sent' },
-                { id: 'Arrived', name: 'Arrived' },
-                { id: 'Returned', name: 'Returned' },
-                { id: 'Cancelled', name: 'Cancelled' },
-                { id: 'Refunded', name: 'Refunded' },
-            ]} />
+            <TextInput source="PayerName" name="PayerName"/>
+            <TextInput source="Email" name="Email"/>
+            <TextInput source="RecieverName" name="RecieverName"/>
+            <TextInput source="Address" name="Address"/>
+            <TextInput source="ZipCode" name="ZipCode"/>
+            <TextInput source="City" name="City"/>
+            <TextInput source="Country" name="Country"/>
+            <TextInput source="PhoneNumber" name="PhoneNumber"/>
+            <ReferenceInput source="Status" reference="status" name="Status">
+                <SelectInput optionText="Name" />
+            </ReferenceInput>
+            <ReferenceInput source="Delivery" reference="deliveries" name="Delivery">
+                <SelectInput optionText="Name" />
+            </ReferenceInput>
+            <ReferenceInput source="Coupon" reference="coupons" name="Coupon">
+                <SelectInput optionText="Code" />
+            </ReferenceInput>
+            <ReferenceInput source="MemberId" reference="members" name="MemberId">
+                <SelectInput optionText="FirstName" />
+            </ReferenceInput>
+            <TextInput source="Notes" name="Notes"/>
+            <BooleanInput label="Refund" source="refund" defaultValue={false} name="Refund"/>
         </SimpleForm>
     </Edit>
-);
+)};
 
 export const OrderShow = (props) => (
     <Show {...props}>
         <TabbedShowLayout>
             <Tab label="Payer Information">
                 <TextField source="id" label="Order ID"/>
-                <TextField source="payerName"/>
-                <TextField source="email"/>
-                <TextField source="payment"/>
-                <TextField source="price"/>
-                <TextField source="status"/>
+                <TextField source="OrderNum" />
+                <TextField source="PayerName" />
+                <TextField source="Email"/>
+                <TextField source="Payment"/>
+                <TextField source="Sum"/>
+                <TextField source="Status"/>
             </Tab>
             <Tab label="Items">
-                <ArrayField source="items" fieldKey="id">
+                <ArrayField source="Products" fieldKey="id">
                     <Datagrid>
                         <TextField source="id"/>
-                        <TextField source="title"/>
-                        <TextField source="format"/>
-                        <TextField source="language"/>
-                        <TextField source="price" label="Price Per Unit"/>
-                        <TextField source="publisher"/>
+                        <ReferenceField source="id" reference="products" label="Title">
+                            <TextField source="Title"/>
+                        </ReferenceField>
+                        <ReferenceField source="id" reference="products" label="Price Per Unit">
+                            <TextField source="CurrentPrice"/>
+                        </ReferenceField>
+                        <TextField source="amount"/>
                     </Datagrid>
                 </ArrayField>
             </Tab>
             <Tab label="Reciever Information">
-                <TextField source="recieverName"/>
-                <TextField source="phoneNum"/>
-                <TextField source="fullAd"/>
-                <TextField source="zipCode"/>
-                <TextField source="city"/>
-                <TextField source="country"/>
-                <TextField source="notes"/>
+                <TextField source="RecieverName"/>
+                <TextField source="PhoneNumber"/>
+                <TextField source="Address"/>
+                <TextField source="ZipCode"/>
+                <TextField source="City"/>
+                <TextField source="Country"/>
+                <TextField source="Notes"/>
             </Tab>
         </TabbedShowLayout>
     </Show>

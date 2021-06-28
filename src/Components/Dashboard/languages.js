@@ -16,25 +16,25 @@ import {
 } from 'react-admin';
 import { Fragment } from 'react';
 
-const RoleBulkActionButtons = props => (
+const LanguageBulkActionButtons = props => (
     <Fragment>
         <BulkDeleteWithConfirmButton {...props} />
     </Fragment>
 );
 
-const RoleTitle = ({ record }) => {
+const LanguageTitle = ({ record }) => {
     return <span>Post {record ? `"${record.Name}"` : ''}</span>;
 };
 
-const RoleEditToolbar = props => (
+const LanguageEditToolbar = props => (
     <Toolbar {...props} >
         <SaveButton />
         <DeleteWithConfirmButton/>
     </Toolbar>
 );
 
-export const RoleList = props => (
-    <List bulkActionButtons={<RoleBulkActionButtons />} {...props}>
+export const LanguageList = props => (
+    <List bulkActionButtons={<LanguageBulkActionButtons />} {...props}>
         <Datagrid rowClick="edit">
             <TextField source="id" />
             <TextField source="Name" />
@@ -43,7 +43,7 @@ export const RoleList = props => (
     </List>
 );
 
-export const RoleCreate = props => (
+export const LanguageCreate = props => (
     <Create {...props}>
          <SimpleForm>
             <TextInput source="Name" validate={[required()]} name="name"/>
@@ -51,10 +51,10 @@ export const RoleCreate = props => (
      </Create>
  );
 
- export const RoleEdit = props => (
-    <Edit title={<RoleTitle />} {...props}>
-        <SimpleForm toolbar={<RoleEditToolbar />}>
-            <TextInput source="Name" validate={[required()]} name="name"/>
+ export const LanguageEdit = props => (
+    <Edit title={<LanguageTitle />} {...props}>
+        <SimpleForm toaolbar={<LanguageEditToolbar />}>
+            <TextInput source="Name" name="Name"/>
         </SimpleForm>
     </Edit>
 );

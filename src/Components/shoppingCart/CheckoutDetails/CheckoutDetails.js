@@ -16,6 +16,7 @@ class CheckoutDetails extends Component {
         coupon: "",
         couponNotice: null,
         discount: 0,
+        couponList: []
       }
 
     }
@@ -25,13 +26,31 @@ class CheckoutDetails extends Component {
     }
 
     componentDidMount = () => {
+        this.setCoupon()
+    }
+
+    setCoupon = () => {
         let hasCoupon = localStorage.getItem('coupon')
         if (hasCoupon && hasCoupon !== 0 && hasCoupon !== "0") {
             this.setState({
-                couponNotice: <p className="pl-3">Discount: %15</p>,
-                discount: 15,
+                couponNotice: <p className="pl-3">Discount: %{hasCoupon}</p>,
+                discount: Number(hasCoupon),
             }, () => {this.updatePrice()})
+        } else {
+            this.setState({
+                couponNotice: null
+            })
         }
+    }
+
+    getCoupons = async() => {
+        const response = await fetch("/coupons", {
+            method: 'GET'
+        });
+        let myres = await response.json()
+        this.setState({
+            couponList: myres
+        })
     }
 
     updatePrice = () => {
@@ -40,16 +59,15 @@ class CheckoutDetails extends Component {
         let total = sum + tax;
         let newTotal;
         if (this.state.discount !== 0) {
-            let discount = (total/100) * 15;
+            let discount = (total/100) * this.state.discount;
             newTotal = total - discount
-
         } else {
             newTotal = total;
         }   
         if (newTotal !== this.state.totalPrice) {
             this.setState({
                 totalPrice: newTotal,
-            },)
+            })
         }
     }
 
@@ -60,14 +78,21 @@ class CheckoutDetails extends Component {
         })
     }
 
-    checkCoupon = () => {
+    checkCoupon = async() => {
         this.couponRef.current.value = ""
-        if(this.state.coupon === "HUMMUS") {
+
+        const response = await fetch(`/coupons/findcode/${this.state.coupon}`, {
+            method: 'GET'
+        });
+        let myres = await response.json()
+        if(myres.length) {
             this.setState({
-                couponNotice: <p className="pl-3">Discount: %15</p>,
-                discount: 15,
-            }, () => {this.updatePrice()})
-            localStorage.setItem('coupon',15);
+                couponNotice: <p className="pl-3">Discount: %{myres[0].Discount}</p>,
+                discount: myres[0].Discount
+            }, () => {
+                this.updatePrice()
+                localStorage.setItem('coupon',myres[0].Discount);
+            })
         } else {
             this.setState({
                 couponNotice: <p className="pl-3 text-red-500">INVALID COUPON</p>,
@@ -77,6 +102,23 @@ class CheckoutDetails extends Component {
     }
 
     render () {
+
+        let checkoutBtn;
+        if(this.props.totalProductsSum > 0) {
+            checkoutBtn =                 <p className="pl-3">
+                <Link to="/signedInCheckout">
+                    <button className="bg-yellow-800 border border-yellow-800 hover:bg-yellow-100 hover:text-yellow-800 text-white active:bg-yellow-800 uppercase text-2xl px-6 py-3 rounded shadow hover:shadow-lg outline-none focus:outline-none mr-1 mb-2 mt-2">
+                        Checkout
+                    </button>
+                </Link>
+            </p>
+        } else {
+            checkoutBtn =                 <p className="pl-3">
+                <button className="bg-yellow-800 border border-yellow-800 text-white uppercase text-2xl px-6 py-3 rounded shadow outline-none mr-1 mb-2 mt-2 opacity-75 cursor-auto" disabled>
+                    Checkout
+                </button>
+            </p>
+        }
 
       return (
         <div className="CheckoutDetails m-5">
@@ -125,13 +167,7 @@ class CheckoutDetails extends Component {
                     </span>
                 </p>
                 <hr className="mx-6 border-yellow-800"/>
-                <p className="pl-3">
-                    <Link to="/signedInCheckout">
-                        <button className="bg-yellow-800 border border-yellow-800 hover:bg-yellow-100 hover:text-yellow-800 text-white active:bg-yellow-800 uppercase text-2xl px-6 py-3 rounded shadow hover:shadow-lg outline-none focus:outline-none mr-1 mb-2 mt-2">
-                            Checkout
-                        </button>
-                    </Link>
-                </p>
+                {checkoutBtn}
             </div>
         </div>
       )

@@ -1,17 +1,17 @@
 import React, { Component } from 'react';
 import './ProductPage.css';
-// import data from '../../data.json';
 import formatStars from '../utility/Stars';
 import formatPrice from '../utility/Price';
 import formatPrecent from '../utility/Pecent';
-// import axios from 'axios';
-import {db} from '../../firebase'
+import { Link } from 'react-router-dom';
 
 class ProductPage extends Component{
     constructor(props) {
         super(props);
         this.state = {
+            product: null,
             imgUrl: "https://via.placeholder.com/350x450",
+            mainImg: "https://via.placeholder.com/350x450",
             title: null,
             format: null,
             pages: null,
@@ -32,49 +32,133 @@ class ProductPage extends Component{
             diff: null,
             shoppingCart: [],
             cartMessage: null,
+            imgOne: "https://via.placeholder.com/350x450/0000FF",
+            imgTwo: "https://via.placeholder.com/350x450/FF0000",
+            imgThree: "https://via.placeholder.com/350x450/008000",
+            imgFour: "https://via.placeholder.com/350x450/000000",
+            recs: [],
+            times: 0,
         };
     }
 
     showEvent = (event) => {
         this.setState ({
-            imgUrl: event.target.src
+            mainImg: event.target.src
         })
     }
 
     componentDidMount() {
-        let MyISBN10 = this.props.match.params.itemISBN;
+        this.getProduct()
+        this.getRecs()
+    }
 
-        db.ref('products').on('value', (snapshot)=>{
-            let arr = [];
-            for (let obj in snapshot.val()) {
-                arr.push(snapshot.val()[obj])
-            }
+    getRecs = async() => {
 
-            for (let myObj of arr) {
-                if(myObj.ISBN10 === MyISBN10) {
-                    let diff = myObj.originalPrice - myObj.price;
-                    this.setState({
-                        diff: diff,
-                        title: myObj.title,
-                        format: myObj.format,
-                        pages: myObj.pages,
-                        dimensions: myObj.dimensions,
-                        weight: myObj.weight,
-                        publisher: myObj.publisher,
-                        publicationPlace: myObj.publicationPlace,
-                        language: myObj.language,
-                        price: myObj.price,
-                        publicationDate: myObj.publicationDate,
-                        description: myObj.description,
-                        ISBN10: myObj.ISBN10,
-                        ISBN13: myObj.ISBN13,
-                        author: myObj.author,
-                        artist: myObj.artist,
-                        stars: myObj.stars,
-                        originalPrice: myObj.originalPrice
-                    })
-                }
-            }
+        let MyID = this.props.match.params.itemISBN;
+
+        const response = await fetch(`/products/id/${MyID}`, {
+            method: 'GET'
+        });
+        let myres = await response.json()
+
+        this.setState({
+            recs: myres,
+        })
+    }
+
+    getProduct = async() => {
+
+        let MyID = this.props.match.params.itemISBN;
+
+        const response = await fetch(`/products/${MyID}`, {
+            method: 'GET'
+        });
+        let myres = await response.json()
+
+        this.setState({
+            product: myres,
+        }, () => {
+            this.getOtherImages(this.state.product.id)
+            this.getPublisher(this.state.product.Publisher)
+            this.getLanguage(this.state.product.Language)
+            this.getFormat(this.state.product.Format)
+            this.setState({
+                title: this.state.product.Title,
+                pages: this.state.product.Pages,
+                dimensions: this.state.product.Dimensions,
+                weight: this.state.product.Weight,
+                price: this.state.product.CurrentPrice,
+                publicationDate: this.state.product.PublicationDate.slice(0,10),
+                description: this.state.product.Description,
+                ISBN10: this.state.product.ISBN10,
+                ISBN13: this.state.product.ISBN13,
+                author: this.state.product.Author,
+                artist: this.state.product.Artist,
+                stars: this.state.product.Stars,
+                originalPrice: this.state.product.OriginalPrice,
+                imgUrl: this.state.product.MainImage === null ? "https://via.placeholder.com/350x450" : `/photos/photoSrc/products/${this.state.product.MainImage}`,
+                mainImg: this.state.product.MainImage === null ? "https://via.placeholder.com/350x450" : `/photos/photoSrc/products/${this.state.product.MainImage}`,
+            })
+        })
+
+    }
+
+    getOtherImages = async(prodid) => {
+        const response = await fetch(`/productimages/byprod/${prodid}`, {
+            method: 'GET'
+        });
+        let myres = await response.json()
+        let imgs = myres;
+        if(imgs[0]) {
+            this.setState({
+                imgOne: `/photos/photoSrc/products/${imgs[0].Name}`
+            })
+        }
+        if(imgs[1]) {
+            this.setState({
+                imgTwo: `/photos/photoSrc/products/${imgs[1].Name}`
+            })
+        }
+        if(imgs[2]) {
+            this.setState({
+                imgThree: `/photos/photoSrc/products/${imgs[2].Name}`
+            })
+        }
+        if(imgs[3]) {
+            this.setState({
+                imgFour: `/photos/photoSrc/products/${imgs[3].Name}`
+            })
+        }
+    }
+
+    getFormat = async(formatid) => {
+        const response = await fetch(`/formats/${formatid}`, {
+            method: 'GET'
+        });
+        let myres = await response.json()
+        this.setState({
+            format: myres.Name,
+        })
+    }
+
+    getLanguage = async(langid) => {
+        const response = await fetch(`/languages/${langid}`, {
+            method: 'GET'
+        });
+        let myres = await response.json()
+        this.setState({
+            language: myres.Name,
+        })
+    }
+
+    getPublisher = async(pubid) => {
+        const response = await fetch(`/publishers/${pubid}`, {
+            method: 'GET'
+        });
+        let myres = await response.json()
+        this.setState({
+            publisher: myres.Name,
+            publicationPlace: `${myres.PublicationCity}, ${myres.PublicationCountry}`
         })
     }
 
@@ -102,7 +186,7 @@ class ProductPage extends Component{
                     </h1>
                 </div>
                 <div className="col-span-1 row-span-3 place-self-center">
-                    <img src={this.state.imgUrl} className="border border-black" alt=""/>
+                    <img src={this.state.mainImg} className="border border-black" alt=""/>
                 </div>
                 <div className="col-span-2 row-span-3 bg-gray-300 p-9 border border-gray-200 rounded text-xl">
                     <p>
@@ -140,7 +224,7 @@ class ProductPage extends Component{
                     </p>
                     <br/>
                     <button 
-                        className="bg-yellow-700 text-yellow-100 active:bg-yellow-700 font-medium uppercase text-lg px-4 py-2 rounded shadow hover:shadow-md outline-none focus:outline-none mr-1 mb-1 hover:bg-yellow-100 hover:text-yellow-600 active:bg-white" 
+                        className="bg-yellow-700 text-yellow-100 active:bg-yellow-700 font-medium uppercase text-2xl px-4 py-2 rounded shadow hover:shadow-md outline-none focus:outline-none mr-1 mb-1 hover:bg-yellow-100 hover:text-yellow-600 active:bg-white" 
                         type="button" 
                         style={{ transition: "all .15s ease" }} 
                         onClick={() => {
@@ -150,19 +234,12 @@ class ProductPage extends Component{
                     >
                         <i className="fas fa-cart-arrow-down"></i> Add to Cart
                     </button>
-                    <button 
-                        className="text-yellow-700 bg-yellow-100 border border-solid border-yellow-700 hover:bg-yellow-700 hover:text-yellow-100 active:bg-yellow-700 font-medium uppercase text-lg px-4 py-2 rounded outline-none focus:outline-none mr-1 mb-1" 
-                        type="button" 
-                        style={{ transition: "all .15s ease" }}
-                    >
-                        <i className="far fa-heart"></i> Add to Wishlist
-                    </button>
                 </div>
                 <div className="col-span-1 row-span-1">
                     <div className="grid grid-cols-5 grid-rows-1 gap-2">
                         <span className="col-span-1">
                             <img 
-                                src="https://via.placeholder.com/350x450" 
+                                src={this.state.imgUrl}
                                 width="50" 
                                 className="mx-auto border border-black" 
                                 alt="" 
@@ -170,40 +247,16 @@ class ProductPage extends Component{
                             />
                         </span>
                         <span className="col-span-1">
-                            <img 
-                                src="https://via.placeholder.com/350x450/0000FF" 
-                                alt="" 
-                                width="50" 
-                                className="mx-auto border border-black" 
-                                onClick={this.showEvent.bind(this)}
-                            />
+                            {(this.state.imgOne === "https://via.placeholder.com/350x450/0000FF") ? <img src={this.state.imgOne} alt="" width="50" className="mx-auto border border-black opacity-50"/> : <img src={this.state.imgOne} alt="" width="50" className="mx-auto border border-black cursor-pointer" onClick={this.showEvent.bind(this)}/>}
                         </span>
                         <span className="col-span-1" href="">
-                            <img 
-                                src="https://via.placeholder.com/350x450/FF0000" 
-                                alt="" 
-                                width="50" 
-                                className="mx-auto border border-black" 
-                                onClick={this.showEvent.bind(this)}
-                            />
+                            {(this.state.imgTwo === "https://via.placeholder.com/350x450/FF0000") ? <img src={this.state.imgTwo} alt="" width="50" className="mx-auto border border-black opacity-50"/> : <img src={this.state.imgTwo} alt="" width="50" className="mx-auto border border-black cursor-pointer" onClick={this.showEvent.bind(this)}/>}
                         </span>
                         <span className="col-span-1" href="">
-                            <img 
-                                src="https://via.placeholder.com/350x450/008000" 
-                                alt="" 
-                                width="50" 
-                                className="mx-auto border border-black" 
-                                onClick={this.showEvent.bind(this)}
-                            />
+                            {(this.state.imgThree === "https://via.placeholder.com/350x450/008000") ? <img src={this.state.imgThree} alt="" width="50" className="mx-auto border border-black opacity-50"/> : <img src={this.state.imgThree} alt="" width="50" className="mx-auto border border-black cursor-pointer" onClick={this.showEvent.bind(this)}/>}
                         </span>
                         <span className="col-span-1" href="">
-                            <img 
-                                src="https://via.placeholder.com/350x450/000000" 
-                                alt="" 
-                                width="50" 
-                                className="mx-auto border border-black" 
-                                onClick={this.showEvent.bind(this)}
-                            />
+                            {(this.state.imgFour === "https://via.placeholder.com/350x450/000000") ? <img src={this.state.imgFour} alt="" width="50" className="mx-auto border border-black opacity-50"/> : <img src={this.state.imgFour} alt="" width="50" className="mx-auto border border-black cursor-pointer" onClick={this.showEvent.bind(this)}/>}
                         </span>
                     </div>
                 </div>
@@ -216,7 +269,7 @@ class ProductPage extends Component{
                             </p>
                             <p>
                                 <span className="font-medium text-yellow-600">Dimensions: </span>
-                                {this.state.dimensions} | {this.state.weight}
+                                {this.state.dimensions} | {this.state.weight}g
                             </p>
                             <p>
                                 <span className="font-medium text-yellow-100">Publication date: </span>
@@ -259,48 +312,23 @@ class ProductPage extends Component{
                     </p>
                     <br/>
                     <div className="grid grid-cols-3 grid-rows-1 gap-2 text-sm px-2 py-3">
-                        <p className="col-span-1">
-                            <span>
-                                <img src="https://via.placeholder.com/100x150" alt="" className="border border-black float-left mr-2" />
-                            </span>
-                            <span className="font-medium text-yellow-400 text-lg">Lorem ipsum dolor sit amet</span>
-                            <br/>
-                            <span className="font-medium text-gray-200 text-base">$25</span>
-                            <br/>
-                            <i className="fas fa-star text-yellow-500"></i>
-                            <i className="fas fa-star text-yellow-500"></i> 
-                            <i className="fas fa-star text-yellow-500"></i>
-                            <i className="far fa-star text-yellow-500"></i>
-                            <i className="far fa-star text-yellow-500"></i>
-                        </p>
-                        <p className="col-span-1">
-                            <span>
-                                <img src="https://via.placeholder.com/100x150" alt="" className="border border-black float-left mr-2" />
-                            </span>
-                            <span className="font-medium text-yellow-400 text-lg">Lorem ipsum dolor sit amet</span>
-                            <br/>
-                            <span className="font-medium text-gray-200 text-base">$17</span>
-                            <br/>
-                            <i className="fas fa-star text-yellow-500"></i>
-                            <i className="fas fa-star text-yellow-500"></i> 
-                            <i className="fas fa-star text-yellow-500"></i>
-                            <i className="fas fa-star text-yellow-500"></i>
-                            <i className="fas fa-star text-yellow-500"></i>
-                        </p>
-                        <p className="col-span-1">
-                            <span>
-                                <img src="https://via.placeholder.com/100x150" alt="" className="border border-black float-left mr-2" />
-                            </span>
-                            <span className="font-medium text-yellow-400 text-lg">Lorem ipsum dolor sit amet</span>
-                            <br/>
-                            <span className="font-medium text-gray-200 text-base">$37</span>
-                            <br/>
-                            <i className="fas fa-star text-yellow-500"></i>
-                            <i className="fas fa-star text-yellow-500"></i> 
-                            <i className="far fa-star text-yellow-500"></i>
-                            <i className="far fa-star text-yellow-500"></i>
-                            <i className="far fa-star text-yellow-500"></i>
-                        </p>
+
+                        {this.state.recs.length ? this.state.recs.map((rec) => (
+                            <p className="col-span-1" key={rec.id}>
+                                <span>
+                                    {rec.MainImage !== null ? 
+                                    <img src={`/photos/photoSrc/products/${rec.MainImage}`} alt="" width="100" className="border border-black float-left mr-2" /> : 
+                                    <img src="https://via.placeholder.com/100x150" alt="" className="border border-black float-left mr-2" />}
+                                </span>
+                                <Link to={"/item/" + rec.id} onClick={() => {window.location.href="/item/" + rec.id}}>
+                                    <span className="font-medium text-yellow-400 text-lg">{rec.Title}</span>
+                                </Link>
+                                <br/>
+                                <span className="font-medium text-gray-200 text-base">{formatPrice(rec.CurrentPrice)}</span>
+                                <br/>
+                                <span className="text-yellow-500">{formatStars(rec.Stars)}</span>
+                            </p>
+                        )) : null}
                     </div>
                 </div>
               </div>
