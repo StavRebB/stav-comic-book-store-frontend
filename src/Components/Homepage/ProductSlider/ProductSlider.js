@@ -94,7 +94,7 @@ class ProductSlider extends Component {
                         {this.state.products && this.state.products.map( (product, index) => {
                             return (
                                 <div className="text-xl" id={`${this.props.slideId}-${index}`} key={product.ISBN10}>
-                                    <img src={product.MainImage ? `/photos/photoSrc/products/${product.MainImage}` : "https://via.placeholder.com/150x250"} width="100px" alt="somepic" className="itemImage h-auto w-1/3 mx-auto mt-4" />
+                                    <img src={product.MainImage ? `${process.env.REACT_APP_SERVER_DOMAIN}/photos/photoSrc/products/${product.MainImage}` : "https://via.placeholder.com/150x250"} width="100px" alt="somepic" className="itemImage h-auto w-1/3 mx-auto mt-4" />
                                     <p className="mx-auto text-xl text-yellow-700 cursor-pointer" onClick={this.showModal}>
                                         {product.Title}
                                     </p>

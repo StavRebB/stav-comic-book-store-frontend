@@ -317,7 +317,7 @@ class ProductPage extends Component{
                             <p className="col-span-1" key={rec.id}>
                                 <span>
                                     {rec.MainImage !== null ? 
-                                    <img src={`/photos/photoSrc/products/${rec.MainImage}`} alt="" width="100" className="border border-black float-left mr-2" /> : 
+                                    <img src={`${process.env.REACT_APP_SERVER_DOMAIN}/photos/photoSrc/products/${rec.MainImage}`} alt="" width="100" className="border border-black float-left mr-2" /> : 
                                     <img src="https://via.placeholder.com/100x150" alt="" className="border border-black float-left mr-2" />}
                                 </span>
                                 <Link to={"/item/" + rec.id} onClick={() => {window.location.href="/item/" + rec.id}}>

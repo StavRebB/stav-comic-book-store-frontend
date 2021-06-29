@@ -37,7 +37,7 @@ const CartQuickView = ({ handleClose, show, productList, itemNum, itemSum }) => 
                   key={product.ISBN13}
                 >
                     <img 
-                      src={product.MainImage ? `/photos/photoSrc/products/${product.MainImage}` : "https://via.placeholder.com/150x250"} 
+                      src={product.MainImage ? `${process.env.REACT_APP_SERVER_DOMAIN}/photos/photoSrc/products/${product.MainImage}` : "https://via.placeholder.com/150x250"} 
                       className="cartImage float-left" 
                       alt="" 
                     />

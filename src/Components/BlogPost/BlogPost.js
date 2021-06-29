@@ -60,7 +60,7 @@ class BlogPost extends Component {
             content: myres.Content,
             title: myres.Title,
             date: myres.DateOfWriting.split('T')[0],
-            postImage: myres.Image ? `/photos/photoSrc/posts/${myres.Image}` : null,
+            postImage: myres.Image ? `${process.env.REACT_APP_SERVER_DOMAIN}/photos/photoSrc/posts/${myres.Image}` : null,
             video: myres.Video
         }, () => {
             this.getComments(this.state.postid);

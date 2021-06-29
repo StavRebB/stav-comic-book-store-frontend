@@ -46,7 +46,7 @@ class ItemView extends Component {
                     <li key={product.id}>
                         <div className="product rounded bg-gray-600">
                             <span>
-                                <img src={`/photos/photoSrc/products/${product.MainImage}`} width="150" alt={product.Title}></img>
+                                <img src={`${process.env.REACT_APP_SERVER_DOMAIN}/photos/photoSrc/products/${product.MainImage}`} width="150" alt={product.Title}></img>
                                 <Link to={"/item/" + product.id}>
                                 <p className="item-title text-yellow-400 text-2xl">
                                     {product.Title}

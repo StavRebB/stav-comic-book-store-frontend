@@ -34,7 +34,7 @@ const Modal = ({ handleClose, show, title, products, addToStorage }) => {
         </div>
         {/*body*/}
         <div className="relative p-6 flex-auto">
-          <img src={obj.MainImage ? `/photos/photoSrc/products/${obj.MainImage}` : "https://via.placeholder.com/150x250"} className="float-left pr-12" alt="" />
+          <img src={obj.MainImage ? `${process.env.REACT_APP_SERVER_DOMAIN}/photos/photoSrc/products/${obj.MainImage}` : "https://via.placeholder.com/150x250"} className="float-left pr-12" alt="" />
           <p className="my-1 text-gray-600 text-xl leading-relaxed">
             Author: {obj.Author}
             <br/>

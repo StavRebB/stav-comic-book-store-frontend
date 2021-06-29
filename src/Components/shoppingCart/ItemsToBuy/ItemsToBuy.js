@@ -167,7 +167,7 @@ class ItemsToBuy extends Component {
                     >
                         <div className="col-span-2 row-span-1">
                             <img 
-                                src={product.MainImage ? `/photos/photoSrc/products/${product.MainImage}` : "https://via.placeholder.com/150x250"} 
+                                src={product.MainImage ? `${process.env.REACT_APP_SERVER_DOMAIN}/photos/photoSrc/products/${product.MainImage}` : "https://via.placeholder.com/150x250"} 
                                 alt={product.Title} 
                                 className="cartImage float-left mr-5"
                             />
