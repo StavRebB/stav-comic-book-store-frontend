@@ -49,21 +49,21 @@ class HeaderSlider extends Component {
                   <Link exact="true" to="/catalogue">
                     <button className="text-5xl z-10 absolute text-white font-bold left-1/3 top-1/2 bg-black px-10 py-5">Shop now!</button>
                   </Link>
-                  <img src='/images/spiderJerusalem.png' alt=""/>
+                  <img src='/images/captain-america-banner.jpg' alt=""/>
                 </div>
                 <div className="swiper-slide">
                   <h1 className="text-8xl z-10 absolute text-white font-bold left-1/3 top-20 text-right">Keep up to Date!</h1>
                   <Link to="/blog">
                     <button className="text-5xl z-10 absolute text-white font-bold right-1/3 top-1/2 bg-black px-10 py-5 float-right">Visit our blog!</button>
                   </Link>
-                  <img src='/images/hawkeye.png' alt=""/>
+                  <img src='/images/deadpool-banner.jpg' alt=""/>
                 </div>
                 <div className="swiper-slide">
                   <h1 className="text-8xl z-10 absolute text-white font-bold left-1/3 top-20">Join Our Members!</h1>
                   <Link to="/login">
                     <button className="text-5xl z-10 absolute text-white font-bold left-1/3 top-1/2 bg-black px-10 py-5">Sign Up!</button>
                   </Link>
-                  <img src='/images/wolverine.png' alt=""/>
+                  <img src='/images/iron-man-banner.jpg' alt=""/>
                 </div>
               </div>
               <div className="swiper-pagination" />
