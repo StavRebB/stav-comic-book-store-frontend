@@ -36,7 +36,7 @@ class FinalForm extends Component {
     }
 
     findCoupon = async(num) => {
-        const response = await fetch(`/coupons/finddiscount/${num}`, {
+        const response = await fetch(`${process.env.REACT_APP_SERVER_DOMAIN}/coupons/finddiscount/${num}`, {
             method: 'GET'
         });
         let myres = await response.json()
@@ -46,7 +46,7 @@ class FinalForm extends Component {
     }
 
     findDelivery = async(delid,finalprice) => {
-        const response = await fetch(`/deliveries/${delid}`, {
+        const response = await fetch(`${process.env.REACT_APP_SERVER_DOMAIN}/deliveries/${delid}`, {
             method: 'GET'
         });
         let myres = await response.json()
@@ -66,7 +66,7 @@ class FinalForm extends Component {
         this.props.orderNum(fakeHash)
         let thisDate = new Date();
 
-        const response = await fetch("/orders", {
+        const response = await fetch(`${process.env.REACT_APP_SERVER_DOMAIN}/orders`, {
             method: 'POST',
             headers: {
                 "Accept": "application/json",

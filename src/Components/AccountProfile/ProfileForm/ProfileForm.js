@@ -39,7 +39,7 @@ class ProfileForm extends Component {
 
         let currEmail = localStorage.getItem('currentUser')
 
-        const response = await fetch(`/members/email/${currEmail}`, {
+        const response = await fetch(`${process.env.SERVER_DOMAIN}/members/email/${currEmail}`, {
             method: 'GET'
         });
         let myres = await response.json()
@@ -257,7 +257,7 @@ class ProfileForm extends Component {
 
         if(Object.keys(newObj).length) {
 
-            const response = await fetch(`/members/${this.state.userId}`, {
+            const response = await fetch(`${process.env.REACT_APP_SERVER_DOMAIN}/members/${this.state.userId}`, {
                 method: 'PATCH',
                 headers: {
                     "Accept": "multipart/form-data",

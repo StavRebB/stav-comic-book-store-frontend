@@ -25,6 +25,7 @@ import AddProduct from './Components/AddProduct/AddProduct';
 import Currauth from './auth';
 import TrackOrder from './Components/TrackOrder/TrackOrder';
 import SignedCheckout from './Components/SignedCheckout/SignedCheckout';
+require('dotenv').config()
 
 
 class App extends Component {
@@ -155,7 +156,7 @@ class App extends Component {
     if (this.state.productList.length) {
       let products = [...this.state.productList];
 
-      const response = await fetch(`/products`, {
+      const response = await fetch(`${process.env.REACT_APP_SERVER_DOMAIN}/products`, {
         method: 'GET'
       });
       let myres = await response.json()

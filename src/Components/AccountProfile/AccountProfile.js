@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import './AccountProfile.css';
 import ProfileCard from './ProfileCard/ProfileCard';
 import ProfileForm from './ProfileForm/ProfileForm';
+require('dotenv').config()
 
 class AccountProfile extends Component {
     constructor(props) {
@@ -33,7 +34,7 @@ class AccountProfile extends Component {
 
         let currEmail = localStorage.getItem('currentUser')
 
-        const response = await fetch(`/members/email/${currEmail}`, {
+        const response = await fetch(`${process.env.REACT_APP_SERVER_DOMAIN}/members/email/${currEmail}`, {
             method: 'GET'
         });
         let myres = await response.json()

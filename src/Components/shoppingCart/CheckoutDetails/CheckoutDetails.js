@@ -44,7 +44,7 @@ class CheckoutDetails extends Component {
     }
 
     getCoupons = async() => {
-        const response = await fetch("/coupons", {
+        const response = await fetch(`${process.env.REACT_APP_SERVER_DOMAIN}/coupons`, {
             method: 'GET'
         });
         let myres = await response.json()
@@ -81,7 +81,7 @@ class CheckoutDetails extends Component {
     checkCoupon = async() => {
         this.couponRef.current.value = ""
 
-        const response = await fetch(`/coupons/findcode/${this.state.coupon}`, {
+        const response = await fetch(`${process.env.REACT_APP_SERVER_DOMAIN}/coupons/findcode/${this.state.coupon}`, {
             method: 'GET'
         });
         let myres = await response.json()

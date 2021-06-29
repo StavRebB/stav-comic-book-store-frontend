@@ -31,7 +31,7 @@ class ProductSlider extends Component {
     }
 
     getTops = async() => {
-        const response = await fetch(`/products/tops`, {
+        const response = await fetch(`${process.env.REACT_APP_SERVER_DOMAIN}/products/tops`, {
             method: 'GET'
         });
         let myres = await response.json()
@@ -41,7 +41,7 @@ class ProductSlider extends Component {
     }
 
     getNews = async() => {
-        const response = await fetch(`/products/news`, {
+        const response = await fetch(`${process.env.REACT_APP_SERVER_DOMAIN}/products/news`, {
             method: 'GET'
         });
         let myres = await response.json()
@@ -51,7 +51,7 @@ class ProductSlider extends Component {
     }
 
     getSpecials = async() => {
-        const response = await fetch(`/products/specials`, {
+        const response = await fetch(`${process.env.REACT_APP_SERVER_DOMAIN}/products/specials`, {
             method: 'GET'
         });
         let myres = await response.json()

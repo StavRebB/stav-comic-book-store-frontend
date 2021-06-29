@@ -56,7 +56,7 @@ class ProductPage extends Component{
 
         let MyID = this.props.match.params.itemISBN;
 
-        const response = await fetch(`/products/id/${MyID}`, {
+        const response = await fetch(`${process.env.REACT_APP_SERVER_DOMAIN}/products/id/${MyID}`, {
             method: 'GET'
         });
         let myres = await response.json()
@@ -70,7 +70,7 @@ class ProductPage extends Component{
 
         let MyID = this.props.match.params.itemISBN;
 
-        const response = await fetch(`/products/${MyID}`, {
+        const response = await fetch(`${process.env.REACT_APP_SERVER_DOMAIN}/products/${MyID}`, {
             method: 'GET'
         });
         let myres = await response.json()
@@ -96,43 +96,43 @@ class ProductPage extends Component{
                 artist: this.state.product.Artist,
                 stars: this.state.product.Stars,
                 originalPrice: this.state.product.OriginalPrice,
-                imgUrl: this.state.product.MainImage === null ? "https://via.placeholder.com/350x450" : `/photos/photoSrc/products/${this.state.product.MainImage}`,
-                mainImg: this.state.product.MainImage === null ? "https://via.placeholder.com/350x450" : `/photos/photoSrc/products/${this.state.product.MainImage}`,
+                imgUrl: this.state.product.MainImage === null ? "https://via.placeholder.com/350x450" : `${process.env.REACT_APP_SERVER_DOMAIN}/photos/photoSrc/products/${this.state.product.MainImage}`,
+                mainImg: this.state.product.MainImage === null ? "https://via.placeholder.com/350x450" : `${process.env.REACT_APP_SERVER_DOMAIN}/photos/photoSrc/products/${this.state.product.MainImage}`,
             })
         })
 
     }
 
     getOtherImages = async(prodid) => {
-        const response = await fetch(`/productimages/byprod/${prodid}`, {
+        const response = await fetch(`${process.env.REACT_APP_SERVER_DOMAIN}/productimages/byprod/${prodid}`, {
             method: 'GET'
         });
         let myres = await response.json()
         let imgs = myres;
         if(imgs[0]) {
             this.setState({
-                imgOne: `/photos/photoSrc/products/${imgs[0].Name}`
+                imgOne: `${process.env.REACT_APP_SERVER_DOMAIN}/photos/photoSrc/products/${imgs[0].Name}`
             })
         }
         if(imgs[1]) {
             this.setState({
-                imgTwo: `/photos/photoSrc/products/${imgs[1].Name}`
+                imgTwo: `${process.env.REACT_APP_SERVER_DOMAIN}/photos/photoSrc/products/${imgs[1].Name}`
             })
         }
         if(imgs[2]) {
             this.setState({
-                imgThree: `/photos/photoSrc/products/${imgs[2].Name}`
+                imgThree: `${process.env.REACT_APP_SERVER_DOMAIN}/photos/photoSrc/products/${imgs[2].Name}`
             })
         }
         if(imgs[3]) {
             this.setState({
-                imgFour: `/photos/photoSrc/products/${imgs[3].Name}`
+                imgFour: `${process.env.REACT_APP_SERVER_DOMAIN}/photos/photoSrc/products/${imgs[3].Name}`
             })
         }
     }
 
     getFormat = async(formatid) => {
-        const response = await fetch(`/formats/${formatid}`, {
+        const response = await fetch(`${process.env.REACT_APP_SERVER_DOMAIN}/formats/${formatid}`, {
             method: 'GET'
         });
         let myres = await response.json()
@@ -142,7 +142,7 @@ class ProductPage extends Component{
     }
 
     getLanguage = async(langid) => {
-        const response = await fetch(`/languages/${langid}`, {
+        const response = await fetch(`${process.env.REACT_APP_SERVER_DOMAIN}/languages/${langid}`, {
             method: 'GET'
         });
         let myres = await response.json()
@@ -152,7 +152,7 @@ class ProductPage extends Component{
     }
 
     getPublisher = async(pubid) => {
-        const response = await fetch(`/publishers/${pubid}`, {
+        const response = await fetch(`${process.env.REACT_APP_SERVER_DOMAIN}/publishers/${pubid}`, {
             method: 'GET'
         });
         let myres = await response.json()

@@ -27,7 +27,7 @@ class TrackOrder extends Component {
     }
 
     getOrders = async() => {
-        const response = await fetch(`/orders`, {
+        const response = await fetch(`${process.env.REACT_APP_SERVER_DOMAIN}/orders`, {
             method: 'GET'
         });
         let myres = await response.json()
@@ -37,7 +37,7 @@ class TrackOrder extends Component {
     }
 
     getProducts = async() => {
-        const response = await fetch(`/products`, {
+        const response = await fetch(`${process.env.REACT_APP_SERVER_DOMAIN}/products`, {
             method: 'GET'
         });
         let myres = await response.json()
@@ -47,7 +47,7 @@ class TrackOrder extends Component {
     }
 
     getStatus = async(statusid) => {
-        const response = await fetch(`/status/${statusid}`, {
+        const response = await fetch(`${process.env.REACT_APP_SERVER_DOMAIN}/status/${statusid}`, {
             method: 'GET'
         });
         let myres = await response.json()

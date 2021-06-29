@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import './Blog.css';
 import { Link } from 'react-router-dom';
+require('dotenv').config()
 
 class Blog extends Component {
     constructor(){
@@ -15,7 +16,7 @@ class Blog extends Component {
     }
 
     getPosts = async() => {
-        const response = await fetch(`/blogposts`, {
+        const response = await fetch(`${process.env.REACT_APP_SERVER_DOMAIN}/blogposts`, {
             method: 'GET'
         });
         let myres = await response.json()

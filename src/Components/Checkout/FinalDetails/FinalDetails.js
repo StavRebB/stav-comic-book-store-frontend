@@ -35,7 +35,7 @@ class FinalDetails extends Component {
     }
 
     setDeliveries = async() => {
-        const response = await fetch("/deliveries", {
+        const response = await fetch(`${process.env.REACT_APP_SERVER_DOMAIN}/deliveries`, {
             method: 'GET'
         });
         let myres = await response.json()

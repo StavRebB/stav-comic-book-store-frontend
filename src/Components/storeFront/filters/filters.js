@@ -18,7 +18,7 @@ class Filters extends Component {
     }
 
     getLanguages = async() => {
-        const response = await fetch("/languages", {
+        const response = await fetch(`${process.env.REACT_APP_SERVER_DOMAIN}/languages`, {
             method: 'GET'
         });
         let myres = await response.json()
@@ -28,7 +28,7 @@ class Filters extends Component {
     }
 
     getPublishers = async() => {
-        const response = await fetch("/publishers", {
+        const response = await fetch(`${process.env.REACT_APP_SERVER_DOMAIN}/publishers`, {
             method: 'GET'
         });
         let myres = await response.json()
@@ -38,7 +38,7 @@ class Filters extends Component {
     }
 
     getFormats = async() => {
-        const response = await fetch("/formats", {
+        const response = await fetch(`${process.env.REACT_APP_SERVER_DOMAIN}/formats`, {
             method: 'GET'
         });
         let myres = await response.json()

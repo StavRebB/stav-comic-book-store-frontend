@@ -29,7 +29,7 @@ class Header extends Component{
 
     componentDidMount = async() => {
 
-        const response = await fetch("/products", {
+        const response = await fetch(`${process.env.REACT_APP_SERVER_DOMAIN}/products`, {
             method: 'GET'
         });
         let myres = await response.json()

@@ -27,7 +27,7 @@ class ContactUs extends Component {
     }
 
     getDetails = async() => {
-        const response = await fetch("/storedetails", { method: 'GET' })
+        const response = await fetch(`${process.env.REACT_APP_SERVER_DOMAIN}/storedetails`, { method: 'GET' })
         const myres = await response.json()
         this.setState({
             storename: myres[0].Name,
@@ -42,7 +42,7 @@ class ContactUs extends Component {
     handleSubmit = async(event) => {
         event.preventDefault();
         let someNum = Date.now()
-        const response = await fetch("/mail/sendmailfromclient", {
+        const response = await fetch(`${process.env.REACT_APP_SERVER_DOMAIN}/mail/sendmailfromclient`, {
             method: 'POST',
             headers: {
                 "Accept": "application/json",

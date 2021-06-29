@@ -20,7 +20,7 @@ class Confirmation extends Component {
     }
 
     confirmationEmail = async() => {
-        const response = await fetch("/mail/sendmailtoclient", {
+        const response = await fetch(`${process.env.REACT_APP_SERVER_DOMAIN}/mail/sendmailtoclient`, {
             method: 'POST',
             headers: {
                 "Accept": "application/json",

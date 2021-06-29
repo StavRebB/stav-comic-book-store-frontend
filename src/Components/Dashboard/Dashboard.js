@@ -29,7 +29,7 @@ class Dashboard extends Component {
   }
 
   getProdNum = async() => {
-    const response = await fetch("/products", {
+    const response = await fetch(`${process.env.REACT_APP_SERVER_DOMAIN}/products`, {
         method: 'GET'
     });
     let myres = await response.json()
@@ -40,7 +40,7 @@ class Dashboard extends Component {
   }
 
   getMemNum = async() => {
-    const response = await fetch("/members", {
+    const response = await fetch(`${process.env.REACT_APP_SERVER_DOMAIN}/members`, {
         method: 'GET'
     });
     let myres = await response.json()
@@ -50,7 +50,7 @@ class Dashboard extends Component {
   }
 
   getOrdNum = async() => {
-    const response = await fetch("/orders", {
+    const response = await fetch(`${process.env.REACT_APP_SERVER_DOMAIN}/orders`, {
         method: 'GET'
     });
     let myres = await response.json()
@@ -60,7 +60,7 @@ class Dashboard extends Component {
   }
 
   getPostsNum = async() => {
-    const response = await fetch("/blogposts", {
+    const response = await fetch(`${process.env.REACT_APP_SERVER_DOMAIN}/blogposts`, {
         method: 'GET'
     });
     let myres = await response.json()
@@ -70,7 +70,7 @@ class Dashboard extends Component {
   }
 
   getLangs = async() => {
-    const response = await fetch("/languages", {
+    const response = await fetch(`${process.env.REACT_APP_SERVER_DOMAIN}/languages`, {
       method: 'GET'
   });
   let myres = await response.json()
@@ -79,7 +79,7 @@ class Dashboard extends Component {
   },async() => {
     let mylangs = [...this.state.languages]
     for (let i in mylangs) {
-      const response = await fetch(`/products/lang/${mylangs[i].id}`, {
+      const response = await fetch(`${process.env.REACT_APP_SERVER_DOMAIN}/products/lang/${mylangs[i].id}`, {
         method: 'GET'
       });
       let myres = await response.json()

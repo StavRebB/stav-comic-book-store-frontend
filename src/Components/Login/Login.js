@@ -68,7 +68,7 @@ class Login extends Component {
 
     isSignedWithGoogle = async(currEmail) => {   
 
-        const response = await fetch(`/members/email/${currEmail}`, {
+        const response = await fetch(`${process.env.REACT_APP_SERVER_DOMAIN}/members/email/${currEmail}`, {
             method: 'GET'
         });
         let myres = await response.json()
@@ -82,7 +82,7 @@ class Login extends Component {
 
     createNewUser = async() => {
 
-        const response = await fetch("/members/add", {
+        const response = await fetch(`${process.env.REACT_APP_SERVER_DOMAIN}/members/add`, {
             method: 'POST',
             headers: {
                 "Accept": "multipart/form-data",

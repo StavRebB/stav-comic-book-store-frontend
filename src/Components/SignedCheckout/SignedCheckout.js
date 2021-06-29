@@ -16,7 +16,7 @@ class SignedCheckout extends Component {
 
     let currEmail = localStorage.getItem('currentUser')
 
-    const response = await fetch(`/members/email/${currEmail}`, {
+    const response = await fetch(`${process.env.REACT_APP_SERVER_DOMAIN}/members/email/${currEmail}`, {
       method: 'GET'
     });
     let myres = await response.json()

@@ -25,7 +25,7 @@ class ItemsToBuy extends Component {
         let myItems;
         let generalItems;
 
-        const response = await fetch(`/products`, {
+        const response = await fetch(`${process.env.REACT_APP_SERVER_DOMAIN}/products`, {
             method: 'GET'
         });
         let myres = await response.json()

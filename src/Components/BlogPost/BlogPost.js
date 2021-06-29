@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import './BlogPost.css';
+require('dotenv').config()
 
 class BlogPost extends Component {
     constructor(){
@@ -35,7 +36,7 @@ class BlogPost extends Component {
             })
         } else {
             let userMail = localStorage.getItem('currentUser')
-            const response = await fetch(`/members/email/${userMail}`, {
+            const response = await fetch(`${process.env.REACT_APP_SERVER_DOMAIN}/members/email/${userMail}`, {
                 method: 'GET'
             });
             let myres = await response.json()
@@ -49,7 +50,7 @@ class BlogPost extends Component {
     getPost = async() => {
         let MyPost = this.props.match.params.postName
 
-        const response = await fetch(`/blogposts/${MyPost}`, {
+        const response = await fetch(`${process.env.REACT_APP_SERVER_DOMAIN}/blogposts/${MyPost}`, {
             method: 'GET'
         });
         let myres = await response.json()
@@ -68,7 +69,7 @@ class BlogPost extends Component {
 
     getComments = async(postid) => {
 
-        const response = await fetch(`/comments/commentsbypost/${postid}`, {
+        const response = await fetch(`${process.env.REACT_APP_SERVER_DOMAIN}/comments/commentsbypost/${postid}`, {
             method: 'GET'
         });
         let myres = await response.json()
@@ -96,7 +97,7 @@ class BlogPost extends Component {
     }
 
     getMembers = async() => {
-        const response = await fetch(`/members`, {
+        const response = await fetch(`${process.env.REACT_APP_SERVER_DOMAIN}/members`, {
             method: 'GET'
         });
         let myres = await response.json()
@@ -107,7 +108,7 @@ class BlogPost extends Component {
 
     addComment = async() => {
 
-        const response = await fetch("/comments/", {
+        const response = await fetch(`${process.env.REACT_APP_SERVER_DOMAIN}/comments/`, {
             method: 'POST',
             headers: {
                 "Accept": "multipart/form-data",

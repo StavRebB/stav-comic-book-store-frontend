@@ -37,7 +37,7 @@ class SignUp extends Component {
         await auth.createUserWithEmailAndPassword(this.state.email, this.state.password)
         .then(async() => {
 
-            const response = await fetch("/members/add", {
+            const response = await fetch(`${process.env.REACT_APP_SERVER_DOMAIN}/members/add`, {
                 method: 'POST',
                 headers: {
                     "Accept": "multipart/form-data",
